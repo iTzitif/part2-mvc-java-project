@@ -1,4 +1,3 @@
 package com.university.referral.controller;
 
-public class PatientRecordController {
-}
+public class ClinicianController { }

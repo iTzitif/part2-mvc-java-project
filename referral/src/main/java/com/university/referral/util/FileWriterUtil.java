@@ -1,6 +1,3 @@
 package com.university.referral.util;
 
-public class CsvFileReader {
-}
-
-
+public class FileWriterUtil { }
