@@ -1,7 +1,12 @@
 package com.university.referral;
 
+import com.university.referral.view.MainFrame;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new MainFrame().setVisible(true);
+            System.out.println("Test");
+        });
     }
 }
