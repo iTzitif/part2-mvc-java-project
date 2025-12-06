@@ -1,0 +1,10 @@
+patient_id,first_name,last_name,date_of_birth,nhs_number
+P001,John,Smith,1985-03-15,1234567890
+P002,Emma,Johnson,1990-07-22,2345678901
+P003,Robert,Williams,1975-11-08,3456789012
+P004,Sarah,Brown,1988-09-14,4567890123
+P005,Michael,Davis,1982-12-03,5678901234
+P006,Linda,Miller,1978-04-27,6789012345
+P007,James,Wilson,1992-01-19,7890123456
+P009,Christopher,Taylor,1979-10-05,9012345678
+P010,Elizabeth,Anderson,1987-08-30,0123456789
