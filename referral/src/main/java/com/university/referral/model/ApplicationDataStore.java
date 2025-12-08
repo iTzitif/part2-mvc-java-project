@@ -11,10 +11,14 @@ public class ApplicationDataStore {
 
     public static final String DATA_DIR = "data";
     public static final String PATIENT_CSV = DATA_DIR + "/patients.csv";
+    public static final String CLINICIAN_CSV = DATA_DIR + "/clinicians.csv";
     public static final String APPOINTMENT_CSV = DATA_DIR + "/appointments.csv";
 
+
     private final List<PatientRecord> patientRecords = new ArrayList<>();
+    private final List<ClinicianProfile> clinicianProfiles = new ArrayList<>();
     private final List<AppointmentRecord> appointmentRecords = new ArrayList<>();
+
 
     private ApplicationDataStore() { }
 
@@ -23,15 +27,17 @@ public class ApplicationDataStore {
         return instance;
     }
 
-    // getters
+
     public List<PatientRecord> getPatients() { return patientRecords; }
+    public List<ClinicianProfile> getClinicians() { return clinicianProfiles; }
     public List<AppointmentRecord> getAppointments() { return appointmentRecords; }
 
-    // load all datasets
-    public void loadApplicationData() {
-        loadPatientRecords();   // assume already implemented for patient module
-        loadAppointmentRecords();
 
+
+    public void loadApplicationData() {
+        loadPatientRecords();
+        loadClinicianProfiles();
+        loadAppointmentRecords();
     }
 
     private void loadPatientRecords() {
@@ -42,7 +48,13 @@ public class ApplicationDataStore {
         }
     }
 
-
+    private void loadClinicianProfiles() {
+        List<String[]> rows = CsvFileReader.readCsvFile(CLINICIAN_CSV);
+        for (String[] c : rows) {
+            if (c.length < 4) continue;
+            clinicianProfiles.add(new ClinicianProfile(c[0], c[1], c[2], c[3]));
+        }
+    }
 
     private void loadAppointmentRecords() {
         List<String[]> rows = CsvFileReader.readCsvFile(APPOINTMENT_CSV);
