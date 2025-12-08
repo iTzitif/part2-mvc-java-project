@@ -13,12 +13,12 @@ public class ApplicationDataStore {
     public static final String PATIENT_CSV = DATA_DIR + "/patients.csv";
     public static final String CLINICIAN_CSV = DATA_DIR + "/clinicians.csv";
     public static final String APPOINTMENT_CSV = DATA_DIR + "/appointments.csv";
-
+    public static final String PRESCRIPTION_CSV = DATA_DIR + "/prescriptions.csv";
 
     private final List<PatientRecord> patientRecords = new ArrayList<>();
     private final List<ClinicianProfile> clinicianProfiles = new ArrayList<>();
     private final List<AppointmentRecord> appointmentRecords = new ArrayList<>();
-
+    private final List<PrescriptionEntry> prescriptionEntries = new ArrayList<>();
 
     private ApplicationDataStore() { }
 
@@ -27,17 +27,16 @@ public class ApplicationDataStore {
         return instance;
     }
 
-
     public List<PatientRecord> getPatients() { return patientRecords; }
     public List<ClinicianProfile> getClinicians() { return clinicianProfiles; }
     public List<AppointmentRecord> getAppointments() { return appointmentRecords; }
-
-
+    public List<PrescriptionEntry> getPrescriptions() { return prescriptionEntries; }
 
     public void loadApplicationData() {
         loadPatientRecords();
         loadClinicianProfiles();
         loadAppointmentRecords();
+        loadPrescriptionEntries();
     }
 
     private void loadPatientRecords() {
@@ -64,5 +63,14 @@ public class ApplicationDataStore {
         }
     }
 
+    private void loadPrescriptionEntries() {
+        List<String[]> rows = CsvFileReader.readCsvFile(PRESCRIPTION_CSV);
+        for (String[] c : rows) {
+            if (c.length < 7) continue;
+            prescriptionEntries.add(new PrescriptionEntry(
+                    c[0], c[1], c[2], c[3], c[4], c[5], c[6]
+            ));
+        }
+    }
 
 }
