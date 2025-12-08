@@ -14,11 +14,13 @@ public class ApplicationDataStore {
     public static final String CLINICIAN_CSV = DATA_DIR + "/clinicians.csv";
     public static final String APPOINTMENT_CSV = DATA_DIR + "/appointments.csv";
     public static final String PRESCRIPTION_CSV = DATA_DIR + "/prescriptions.csv";
+    public static final String REFERRAL_CSV = DATA_DIR + "/referrals.csv";
 
     private final List<PatientRecord> patientRecords = new ArrayList<>();
     private final List<ClinicianProfile> clinicianProfiles = new ArrayList<>();
     private final List<AppointmentRecord> appointmentRecords = new ArrayList<>();
     private final List<PrescriptionEntry> prescriptionEntries = new ArrayList<>();
+    private final List<ReferralRequest> referralRequests = new ArrayList<>();
 
     private ApplicationDataStore() { }
 
@@ -27,16 +29,21 @@ public class ApplicationDataStore {
         return instance;
     }
 
+    // getters
     public List<PatientRecord> getPatients() { return patientRecords; }
     public List<ClinicianProfile> getClinicians() { return clinicianProfiles; }
     public List<AppointmentRecord> getAppointments() { return appointmentRecords; }
     public List<PrescriptionEntry> getPrescriptions() { return prescriptionEntries; }
+    public List<ReferralRequest> getReferrals() { return referralRequests; }
 
+
+    // load all datasets
     public void loadApplicationData() {
-        loadPatientRecords();
+        loadPatientRecords();   // assume already implemented for patient module
         loadClinicianProfiles();
         loadAppointmentRecords();
         loadPrescriptionEntries();
+        loadReferralRequests();
     }
 
     private void loadPatientRecords() {
@@ -70,6 +77,14 @@ public class ApplicationDataStore {
             prescriptionEntries.add(new PrescriptionEntry(
                     c[0], c[1], c[2], c[3], c[4], c[5], c[6]
             ));
+        }
+    }
+
+    private void loadReferralRequests() {
+        List<String[]> rows = CsvFileReader.readCsvFile(REFERRAL_CSV);
+        for (String[] c : rows) {
+            if (c.length < 7) continue;
+            referralRequests.add(new ReferralRequest(c[0], c[1], c[2], c[3], c[4], c[5], c[6]));
         }
     }
 

@@ -1,15 +1,14 @@
 package com.university.referral;
 
-import com.university.referral.model.ApplicationDataStore;
 import com.university.referral.view.MainDashboardFrame;
+
+import javax.swing.*;
 
 public class ReferralSystemApplication {
     public static void main(String[] args) {
-
-        ApplicationDataStore.getInstance();
-
-        MainDashboardFrame dashboard = new MainDashboardFrame();
-        dashboard.setVisible(true);
-
+        SwingUtilities.invokeLater(() -> {
+            MainDashboardFrame main = new MainDashboardFrame();
+            main.setVisible(true);
+        });
     }
 }
