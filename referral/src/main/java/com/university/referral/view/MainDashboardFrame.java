@@ -24,12 +24,15 @@ public class MainDashboardFrame extends JFrame {
         var clinicianController = new ClinicianProfileController(dataStore);
         var prescriptionController = new PrescriptionController(dataStore);
         var referralController = new ReferralRequestController(dataStore);
+        var staffController = new StaffController(dataStore);
 
         tabbedPane.addTab("Patient Records", new PatientRecordPanel(this, patientController, dataStore.getPatients()));
         tabbedPane.addTab("Appointments", new AppointmentPanel(this, appointmentController, dataStore.getAppointments()));
         tabbedPane.addTab("Clinicians", new ClinicianPanel(this, clinicianController, dataStore.getClinicians()));
         tabbedPane.addTab("Prescriptions", new PrescriptionPanel(this, prescriptionController, dataStore.getPrescriptions()));
         tabbedPane.addTab("Referrals", new ReferralPanel(this, referralController, dataStore.getReferrals()));
+        tabbedPane.addTab("Staff", new StaffPanel(this, staffController, dataStore.getStaff()));
+
         add(tabbedPane, BorderLayout.CENTER);
     }
 }

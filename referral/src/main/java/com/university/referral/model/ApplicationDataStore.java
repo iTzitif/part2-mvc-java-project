@@ -15,12 +15,14 @@ public class ApplicationDataStore {
     public static final String APPOINTMENT_CSV = DATA_DIR + "/appointments.csv";
     public static final String PRESCRIPTION_CSV = DATA_DIR + "/prescriptions.csv";
     public static final String REFERRAL_CSV = DATA_DIR + "/referrals.csv";
+    public static final String STAFF_CSV = DATA_DIR + "/staff.csv";
 
     private final List<PatientRecord> patientRecords = new ArrayList<>();
     private final List<ClinicianProfile> clinicianProfiles = new ArrayList<>();
     private final List<AppointmentRecord> appointmentRecords = new ArrayList<>();
     private final List<PrescriptionEntry> prescriptionEntries = new ArrayList<>();
     private final List<ReferralRequest> referralRequests = new ArrayList<>();
+    private final List<StaffMember> staffMembers = new ArrayList<>();
 
     private ApplicationDataStore() { }
 
@@ -35,7 +37,7 @@ public class ApplicationDataStore {
     public List<AppointmentRecord> getAppointments() { return appointmentRecords; }
     public List<PrescriptionEntry> getPrescriptions() { return prescriptionEntries; }
     public List<ReferralRequest> getReferrals() { return referralRequests; }
-
+    public List<StaffMember> getStaff() { return staffMembers; }
 
     // load all datasets
     public void loadApplicationData() {
@@ -44,6 +46,7 @@ public class ApplicationDataStore {
         loadAppointmentRecords();
         loadPrescriptionEntries();
         loadReferralRequests();
+        loadStaffMembers();
     }
 
     private void loadPatientRecords() {
@@ -85,6 +88,14 @@ public class ApplicationDataStore {
         for (String[] c : rows) {
             if (c.length < 7) continue;
             referralRequests.add(new ReferralRequest(c[0], c[1], c[2], c[3], c[4], c[5], c[6]));
+        }
+    }
+
+    private void loadStaffMembers() {
+        List<String[]> rows = CsvFileReader.readCsvFile(STAFF_CSV);
+        for (String[] c : rows) {
+            if (c.length < 4) continue;
+            staffMembers.add(new StaffMember(c[0], c[1], c[2], c[3]));
         }
     }
 
