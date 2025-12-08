@@ -16,6 +16,9 @@ public class ApplicationDataStore {
     public static final String PRESCRIPTION_CSV = DATA_DIR + "/prescriptions.csv";
     public static final String REFERRAL_CSV = DATA_DIR + "/referrals.csv";
     public static final String STAFF_CSV = DATA_DIR + "/staff.csv";
+    public static final String FACILITY_CSV = DATA_DIR + "/facilities.csv";
+    public static final String OUTPUT_DIR = "output";
+    public static final String REFERRAL_OUTPUT_FILE = OUTPUT_DIR + "/referrals_out.txt";
 
     private final List<PatientRecord> patientRecords = new ArrayList<>();
     private final List<ClinicianProfile> clinicianProfiles = new ArrayList<>();
@@ -23,6 +26,7 @@ public class ApplicationDataStore {
     private final List<PrescriptionEntry> prescriptionEntries = new ArrayList<>();
     private final List<ReferralRequest> referralRequests = new ArrayList<>();
     private final List<StaffMember> staffMembers = new ArrayList<>();
+    private final List<MedicalFacility> facilities = new ArrayList<>();
 
     private ApplicationDataStore() { }
 
@@ -31,22 +35,22 @@ public class ApplicationDataStore {
         return instance;
     }
 
-    // getters
     public List<PatientRecord> getPatients() { return patientRecords; }
     public List<ClinicianProfile> getClinicians() { return clinicianProfiles; }
     public List<AppointmentRecord> getAppointments() { return appointmentRecords; }
     public List<PrescriptionEntry> getPrescriptions() { return prescriptionEntries; }
     public List<ReferralRequest> getReferrals() { return referralRequests; }
     public List<StaffMember> getStaff() { return staffMembers; }
+    public List<MedicalFacility> getFacilities() { return facilities; }
 
-    // load all datasets
     public void loadApplicationData() {
-        loadPatientRecords();   // assume already implemented for patient module
+        loadPatientRecords();
         loadClinicianProfiles();
         loadAppointmentRecords();
         loadPrescriptionEntries();
         loadReferralRequests();
         loadStaffMembers();
+        loadFacilities();
     }
 
     private void loadPatientRecords() {
@@ -99,4 +103,11 @@ public class ApplicationDataStore {
         }
     }
 
+    private void loadFacilities() {
+        List<String[]> rows = CsvFileReader.readCsvFile(FACILITY_CSV);
+        for (String[] c : rows) {
+            if (c.length < 3) continue;
+            facilities.add(new MedicalFacility(c[0], c[1], c[2]));
+        }
+    }
 }
