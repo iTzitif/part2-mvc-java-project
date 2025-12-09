@@ -4,111 +4,162 @@ import com.university.referral.controller.AppointmentController;
 import com.university.referral.model.AppointmentRecord;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AppointmentPanel extends JPanel {
 
-    private final JTable table;
-    private AppointmentTableModel tableModel;
-    private final JTextField searchField;
-    private final List<AppointmentRecord> originalList;
-    private final AppointmentController controller;
-    private final JFrame parentFrame;
+    private AppointmentController controller;
+    private JTable table;
+    private DefaultTableModel model;
 
-    public AppointmentPanel(JFrame parentFrame, AppointmentController controller, List<AppointmentRecord> appointments) {
-        this.parentFrame = parentFrame;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    public AppointmentPanel(AppointmentController controller) {
         this.controller = controller;
-        this.originalList = appointments;
-
         setLayout(new BorderLayout());
 
-        // Top search
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchField = new JTextField(20);
-        top.add(new JLabel("Search (patient id/date):"));
-        top.add(searchField);
-        add(top, BorderLayout.NORTH);
+        model = new DefaultTableModel(
+                new String[]{"ID", "Patient", "Clinician", "Facility", "Date", "Time", "Duration", "Type", "Status", "Reason", "Notes"}, 0
+        );
 
-        tableModel = new AppointmentTableModel(appointments);
-        table = new JTable(tableModel);
+        table = new JTable(model);
+        loadData();
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Buttons
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttons = new JPanel();
+
         JButton addBtn = new JButton("Add");
         JButton editBtn = new JButton("Edit");
         JButton delBtn = new JButton("Delete");
-        buttons.add(addBtn); buttons.add(editBtn); buttons.add(delBtn);
+
+        buttons.add(addBtn);
+        buttons.add(editBtn);
+        buttons.add(delBtn);
+
         add(buttons, BorderLayout.SOUTH);
 
-        // Actions: simple input dialogs for quick functionality
-        addBtn.addActionListener(e -> {
-            String input = JOptionPane.showInputDialog(parentFrame,
-                    "Enter appointment fields as comma-separated:\nID,PatientID,ClinicianID,Date(yyyy-MM-dd),Time(HH:mm),Type",
-                    "A001," , JOptionPane.PLAIN_MESSAGE);
-            if (input != null && !input.isBlank()) {
-                String[] parts = input.split(",", -1);
-                if (parts.length >= 6) {
-                    AppointmentRecord a = new AppointmentRecord(parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                            parts[3].trim(), parts[4].trim(), parts[5].trim());
-                    controller.addAppointment(a);
-                    refreshTable();
-                } else {
-                    JOptionPane.showMessageDialog(parentFrame, "Invalid input. Need 6 comma-separated values.");
-                }
-            }
-        });
-
-        editBtn.addActionListener(e -> {
-            int r = table.getSelectedRow();
-            if (r == -1) { JOptionPane.showMessageDialog(parentFrame, "Select a row to edit."); return; }
-            AppointmentRecord existing = originalList.get(r);
-            String pre = String.join(",", existing.getAppointmentId(), existing.getPatientId(),
-                    existing.getClinicianId(), existing.getAppointmentDate(), existing.getAppointmentTime(),
-                    existing.getAppointmentType());
-            String input = JOptionPane.showInputDialog(parentFrame, "Edit appointment (comma-separated):", pre);
-            if (input != null) {
-                String[] p = input.split(",", -1);
-                if (p.length >= 6) {
-                    AppointmentRecord updated = new AppointmentRecord(p[0].trim(), p[1].trim(), p[2].trim(),
-                            p[3].trim(), p[4].trim(), p[5].trim());
-                    controller.updateAppointment(r, updated);
-                    refreshTable();
-                } else JOptionPane.showMessageDialog(parentFrame, "Invalid input.");
-            }
-        });
-
-        delBtn.addActionListener(e -> {
-            int r = table.getSelectedRow();
-            if (r == -1) { JOptionPane.showMessageDialog(parentFrame, "Select a row to delete."); return; }
-            if (JOptionPane.showConfirmDialog(parentFrame, "Confirm delete?") == JOptionPane.YES_OPTION) {
-                controller.deleteAppointment(r);
-                refreshTable();
-            }
-        });
-
-        // Search filtering
-        searchField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { filter(); }
-            @Override public void removeUpdate(DocumentEvent e) { filter(); }
-            @Override public void changedUpdate(DocumentEvent e) { filter(); }
-        });
+        addBtn.addActionListener(e -> addAppointment());
+        editBtn.addActionListener(e -> editAppointment());
+        delBtn.addActionListener(e -> deleteAppointment());
     }
 
-    private void filter() {
-        String kw = searchField.getText().toLowerCase();
-        var filtered = originalList.stream()
-                .filter(a -> a.getPatientId().toLowerCase().contains(kw) || a.getAppointmentDate().contains(kw))
-                .toList();
-        tableModel = new AppointmentTableModel(filtered);
-        table.setModel(tableModel);
+    private void loadData() {
+        model.setRowCount(0);
+        List<AppointmentRecord> list = controller.getAll();
+
+        for (AppointmentRecord a : list) {
+            model.addRow(new Object[]{
+                    a.getAppointmentId(),
+                    a.getPatientId(),
+                    a.getClinicianId(),
+                    a.getFacilityId(),
+                    a.getAppointmentDate().format(dateFormatter),
+                    a.getAppointmentTime().format(timeFormatter),
+                    a.getDurationMinutes(),
+                    a.getAppointmentType(),
+                    a.getStatus(),
+                    a.getReasonForVisit(),
+                    a.getNotes()
+            });
+        }
     }
 
-    private void refreshTable() {
-        tableModel = new AppointmentTableModel(originalList);
-        table.setModel(tableModel);
+    private void addAppointment() {
+        AppointmentRecord a = showForm(null);
+        if (a != null) {
+            controller.addAppointment(a);
+            loadData();
+        }
+    }
+
+    private void editAppointment() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Select a row to edit.");
+            return;
+        }
+
+        AppointmentRecord old = controller.getAll().get(row);
+        AppointmentRecord updated = showForm(old);
+
+        if (updated != null) {
+            controller.updateAppointment(row, updated);
+            loadData();
+        }
+    }
+
+    private void deleteAppointment() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Select a row to delete.");
+            return;
+        }
+
+        controller.deleteAppointment(row);
+        loadData();
+    }
+
+    private AppointmentRecord showForm(AppointmentRecord existing) {
+
+        JTextField idField = new JTextField(existing == null ? "" : existing.getAppointmentId());
+        JTextField pField = new JTextField(existing == null ? "" : existing.getPatientId());
+        JTextField cField = new JTextField(existing == null ? "" : existing.getClinicianId());
+        JTextField fField = new JTextField(existing == null ? "" : existing.getFacilityId());
+        JTextField dField = new JTextField(existing == null ? "" : existing.getAppointmentDate().format(dateFormatter));
+        JTextField tField = new JTextField(existing == null ? "" : existing.getAppointmentTime().format(timeFormatter));
+        JTextField durationField = new JTextField(existing == null ? "" : String.valueOf(existing.getDurationMinutes()));
+        JTextField typeField = new JTextField(existing == null ? "" : existing.getAppointmentType());
+        JTextField statusField = new JTextField(existing == null ? "" : existing.getStatus());
+        JTextField reasonField = new JTextField(existing == null ? "" : existing.getReasonForVisit());
+        JTextField notesField = new JTextField(existing == null ? "" : existing.getNotes());
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.add(new JLabel("Appointment ID:")); panel.add(idField);
+        panel.add(new JLabel("Patient ID:")); panel.add(pField);
+        panel.add(new JLabel("Clinician ID:")); panel.add(cField);
+        panel.add(new JLabel("Facility ID:")); panel.add(fField);
+        panel.add(new JLabel("Date (YYYY-MM-DD):")); panel.add(dField);
+        panel.add(new JLabel("Time (HH:MM):")); panel.add(tField);
+        panel.add(new JLabel("Duration (minutes):")); panel.add(durationField);
+        panel.add(new JLabel("Type:")); panel.add(typeField);
+        panel.add(new JLabel("Status:")); panel.add(statusField);
+        panel.add(new JLabel("Reason for Visit:")); panel.add(reasonField);
+        panel.add(new JLabel("Notes:")); panel.add(notesField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Appointment",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            LocalDate date = LocalDate.parse(dField.getText(), dateFormatter);
+            LocalTime time = LocalTime.parse(tField.getText(), timeFormatter);
+            int duration = Integer.parseInt(durationField.getText());
+            LocalDateTime now = LocalDateTime.now();
+
+            return new AppointmentRecord(
+                    idField.getText(),
+                    pField.getText(),
+                    cField.getText(),
+                    fField.getText(),
+                    date,
+                    time,
+                    duration,
+                    typeField.getText(),
+                    statusField.getText(),
+                    reasonField.getText(),
+                    notesField.getText(),
+                    existing == null ? now : existing.getCreatedDate(),
+                    now
+            );
+        }
+
+        return null;
     }
 }
