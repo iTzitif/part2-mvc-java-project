@@ -10,7 +10,10 @@ public class PatientRecordTableModel extends AbstractTableModel {
     private List<PatientRecord> patientRecords;
 
     private final String[] columnNames = {
-            "Patient ID", "Full Name", "Date of Birth", "Phone Number", "Email"
+            "Patient ID", "First Name", "Last Name", "Date of Birth",
+            "NHS Number", "Gender", "Phone", "Email", "Address",
+            "Postcode", "Emergency Contact", "Emergency Phone",
+            "Registration Date", "GP Surgery ID"
     };
 
     public PatientRecordTableModel(List<PatientRecord> patientRecords) {
@@ -34,14 +37,22 @@ public class PatientRecordTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        PatientRecord patient = patientRecords.get(row);
-
+        PatientRecord p = patientRecords.get(row);
         return switch (col) {
-            case 0 -> patient.getPatientId();
-            case 1 -> patient.getName();
-            case 2 -> patient.getDob();
-            case 3 -> patient.getPhone();
-            case 4 -> patient.getEmail();
+            case 0 -> p.getPatientId();
+            case 1 -> p.getFirstName();
+            case 2 -> p.getLastName();
+            case 3 -> p.getDateOfBirth();
+            case 4 -> p.getNhsNumber();
+            case 5 -> p.getGender();
+            case 6 -> p.getPhoneNumber();
+            case 7 -> p.getEmail();
+            case 8 -> p.getAddress();
+            case 9 -> p.getPostcode();
+            case 10 -> p.getEmergencyContactName();
+            case 11 -> p.getEmergencyContactPhone();
+            case 12 -> p.getRegistrationDate();
+            case 13 -> p.getGpSurgeryId();
             default -> null;
         };
     }

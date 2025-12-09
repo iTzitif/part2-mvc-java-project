@@ -32,19 +32,16 @@ public class PatientRecordPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // --- TOP SEARCH BAR ---
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchField = new JTextField(20);
         topPanel.add(new JLabel("Search: "));
         topPanel.add(searchField);
         add(topPanel, BorderLayout.NORTH);
 
-        // --- TABLE ---
         tableModel = new PatientRecordTableModel(patientRecords);
         table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // --- BUTTON PANEL ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         addButton = new JButton("Add");
@@ -57,7 +54,6 @@ public class PatientRecordPanel extends JPanel {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // --- SEARCH BEHAVIOR ---
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) { filterTable(); }
@@ -69,13 +65,9 @@ public class PatientRecordPanel extends JPanel {
             public void changedUpdate(DocumentEvent e) { filterTable(); }
         });
 
-        // --- BUTTON LISTENERS ---
         initializeButtonActions();
     }
 
-    // -------------------------
-    // BUTTON ACTIONS
-    // -------------------------
     private void initializeButtonActions() {
 
         // ADD PATIENT
@@ -89,7 +81,6 @@ public class PatientRecordPanel extends JPanel {
             }
         });
 
-        // EDIT PATIENT
         editButton.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
@@ -107,7 +98,6 @@ public class PatientRecordPanel extends JPanel {
             }
         });
 
-        // DELETE PATIENT
         deleteButton.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
@@ -129,24 +119,20 @@ public class PatientRecordPanel extends JPanel {
         });
     }
 
-    // -------------------------
-    // SEARCH FILTER
-    // -------------------------
     private void filterTable() {
         String keyword = searchField.getText().toLowerCase();
 
         List<PatientRecord> filtered = originalList.stream()
-                .filter(p -> p.getName().toLowerCase().contains(keyword)
-                        || p.getPatientId().toLowerCase().contains(keyword))
+                .filter(p -> p.getFirstName().toLowerCase().contains(keyword)
+                        || p.getLastName().toLowerCase().contains(keyword)
+                        || p.getPatientId().toLowerCase().contains(keyword)
+                        || p.getEmail().toLowerCase().contains(keyword))
                 .toList();
 
         tableModel = new PatientRecordTableModel(filtered);
         table.setModel(tableModel);
     }
 
-    // -------------------------
-    // TABLE REFRESH
-    // -------------------------
     private void refreshTable() {
         tableModel = new PatientRecordTableModel(originalList);
         table.setModel(tableModel);

@@ -36,13 +36,23 @@ public class PatientRecordController {
         for (PatientRecord p : dataStore.getPatients()) {
             csvRows.add(new String[]{
                     p.getPatientId(),
-                    p.getName(),
-                    p.getDob(),
-                    p.getPhone(),
-                    p.getEmail()
+                    p.getFirstName(),
+                    p.getLastName(),
+                    p.getDateOfBirth(),
+                    p.getNhsNumber(),
+                    p.getGender(),
+                    p.getPhoneNumber(),
+                    p.getEmail(),
+                    p.getAddress(),
+                    p.getPostcode(),
+                    p.getEmergencyContactName(),
+                    p.getEmergencyContactPhone(),
+                    p.getRegistrationDate(),
+                    p.getGpSurgeryId()
             });
         }
 
         CsvFileWriter.writeCsv(ApplicationDataStore.PATIENT_CSV, csvRows);
     }
+
 }
