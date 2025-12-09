@@ -1,35 +1,56 @@
-# part2-mvc-java-project
-# Healthcare Appointment and Referral Management System(Java MVC).
+# University Referral Management System
+A Java-based MVC desktop application developed using **Swing**, **CSV-based persistence**, and a modular architecture.  
+This system manages Patients, Appointments, Clinicians, Prescriptions, Referrals, Staff Members, and Medical Facilities.
 
-It is a desktop Java application that will be used to handle patients, clinicians, appointments, prescription, and referral records in a small healthcare workflow.  
-The system is developed on Java and Swing with the architectural pattern of Model-View- Controller (MVC).
+The project follows strict **Model–View–Controller (MVC)** principles and uses a **centralized Singleton ApplicationDataStore** for loading and saving data.
 
-Features
+---
 
-Data Management
-Import the old data on CSV files.
-Show Patients, Clinicians, Appointments, Staff, Prescriptions and Facilities.
-Create, update and remove records using GUI.
-Auto-create new referrals and prescriptions.
+## 📌 Features
 
-Referral Management (Singleton)
-There is a special ReferralManager class which employs the Singleton design pattern to:
-Create new referral records
-Have a managed referral queue.
-Export export referral summaries to a text file.
+### ✅ Patient Management
+- Add, edit, delete patient records  
+- Search patients by ID or name  
+- Persistent storage using CSV  
+- Clean table UI with sorting and filtering  
 
-CSV File Processing
-Reads the first data on the CSV files in the data/ directory.
-Writes revised prescription and referral information to output files:
-  - prescriptionsout.csv or .txt
-  - referralsout.txt
+### ✅ Appointment Management
+- Create, update, delete appointments  
+- Link appointments with patients and clinicians  
+- CSV-based appointment storage  
+- Full CRUD support via dialogs  
 
-GUI (Swing)
-Panera has a clean desktop interface which was developed with:
-JFrame
-JPanel
-JTabbedPane
-JTable
-JButton
-JTextField
+### ✅ Clinician Management
+- Maintain clinician profiles (ID, name, specialty, availability)  
+- Search and filter capabilities  
+- CSV integration  
+
+### ✅ Prescription Management
+- Manage prescription entries  
+- Create prescriptions linked to patients and appointments  
+- Auto-save to CSV  
+
+### ✅ Referral Request Module (Core Requirement)
+- Generate referral requests  
+- Stores requests in CSV  
+- Writes formatted referral output to a text file  
+- ReferralRequestService (Singleton) handles output generation  
+
+### ✅ Staff & Facility Management
+- CRUD operations for staff members  
+- CRUD operations for medical facilities  
+- CSV persistence for both  
+
+### ✅ Centralized DataStore (Singleton)
+- Loads all CSV modules at startup  
+- Provides shared data access across all controllers  
+- Ensures consistency throughout the application  
+
+### ✅ Utility Layer
+- CsvFileReader: loads CSV with graceful fallback  
+- CsvFileWriter: overwrites CSV safely using string rows  
+
+---
+
+## 🏗️ Project Structure (MVC)
 
