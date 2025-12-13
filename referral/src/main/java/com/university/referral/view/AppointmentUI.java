@@ -241,13 +241,13 @@ public class AppointmentUI extends JFrame {
             }
         }
     }
-
+// test
     private void showBookAppointmentDialog() {
         JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
 
         JTextField patientIDField = new JTextField();
         JTextField clinicianIDField = new JTextField();
-        JTextField dateField = new JTextField("yyyy-MM-dd"); // ISO date format
+        JTextField dateField = new JTextField("yyyy-MM-dd");
         JTextField timeField = new JTextField("HH:mm");
         JTextField durationField = new JTextField();
         JTextField typeField = new JTextField();
