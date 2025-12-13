@@ -53,7 +53,7 @@ public class LoginUI extends JFrame {
         mainPanel.add(new JLabel("Role:"), gbc);
 
         gbc.gridx = 1;
-        String[] roles = {"Receptionist", "General Practitioner", "Specialist", "Nurse"};
+        String[] roles = {"Patient","Specialist","Receptionist", "General Practitioner",  "Practice Manager","Nurse"};
         roleComboBox = new JComboBox<>(roles);
         mainPanel.add(roleComboBox, gbc);
 
@@ -79,7 +79,7 @@ public class LoginUI extends JFrame {
         }
 
         this.dispose();
-        new MainMenuUI(role).setVisible(true);
+        new MainMenuUI(role,username).setVisible(true);
     }
 
     public static void main(String[] args) {
