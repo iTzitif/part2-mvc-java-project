@@ -1,43 +1,72 @@
 package com.university.referral.controller;
 
-import com.university.referral.model.ApplicationDataStore;
-import com.university.referral.model.PrescriptionEntry;
-import com.university.referral.util.CsvFileWriter;
+import com.university.referral.model.Prescription;
+import com.university.referral.service.PrescriptionService;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 public class PrescriptionController {
 
-    private final ApplicationDataStore dataStore;
+    private PrescriptionService prescriptionService;
 
-    public PrescriptionController(ApplicationDataStore dataStore) { this.dataStore = dataStore; }
-
-    public List<PrescriptionEntry> getAll() { return dataStore.getPrescriptions(); }
-
-    public void addPrescription(PrescriptionEntry p) {
-        dataStore.getPrescriptions().add(p);
-        saveAll();
+    public PrescriptionController() {
+        prescriptionService = new PrescriptionService();
     }
 
-    public void updatePrescription(int idx, PrescriptionEntry p) {
-        dataStore.getPrescriptions().set(idx, p);
-        saveAll();
+    public boolean createPrescription(String patientId,
+                                      String clinicianId,
+                                      String appointmentId,
+                                      LocalDate prescriptionDate,
+                                      String medicationName,
+                                      String dosage,
+                                      String frequency,
+                                      int durationDays,
+                                      String quantity,
+                                      String instructions,
+                                      String pharmacyName,
+                                      String status,
+                                      LocalDate issueDate,
+                                      LocalDate collectionDate) {
+
+        String prescriptionId = prescriptionService.generatePrescriptionID();
+
+        Prescription prescription = new Prescription(
+                prescriptionId,
+                patientId,
+                clinicianId,
+                appointmentId,
+                prescriptionDate,
+                medicationName,
+                dosage,
+                frequency,
+                durationDays,
+                quantity,
+                instructions,
+                pharmacyName,
+                status,
+                issueDate,
+                collectionDate
+        );
+
+        return prescriptionService.createPrescription(prescription);
     }
 
-    public void deletePrescription(int idx) {
-        dataStore.getPrescriptions().remove(idx);
-        saveAll();
+    public List<Prescription> getPatientPrescriptions(String patientId) {
+        return prescriptionService.getPrescriptionsByPatient(patientId);
     }
-
-    private void saveAll() {
-        List<String[]> rows = new ArrayList<>();
-        for (PrescriptionEntry p : dataStore.getPrescriptions()) {
-            rows.add(new String[] {
-                    p.getPrescriptionId(), p.getAppointmentId(), p.getPatientId(),
-                    p.getClinicianId(), p.getMedicationDetails(), p.getDosage(), p.getInstructions()
-            });
+    public List<Prescription> getAllPrescriptions() {
+        return prescriptionService.getAllPrescriptions();
+    }
+    public Prescription findPrescription(String prescriptionId) {
+        return prescriptionService.getPrescriptionByID(prescriptionId);
+    }
+    public boolean deletePrescription(String prescriptionId) {
+        if (prescriptionId == null || prescriptionId.isEmpty()) {
+            return false;
         }
-        CsvFileWriter.writeCsv(ApplicationDataStore.PRESCRIPTION_CSV, rows);
+        return prescriptionService.deletePrescription(prescriptionId);
     }
+
+
 }
