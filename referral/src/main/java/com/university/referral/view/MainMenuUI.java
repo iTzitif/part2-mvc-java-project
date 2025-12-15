@@ -69,7 +69,7 @@ public class MainMenuUI extends JFrame {
             addMenuButton("Create Referrals", e -> createReferral());
             addMenuButton("Receive Referral", e -> receiveReferral());
         }
-
+//
 
 // -------------------------------------------------------------
 // GENERAL PRACTITIONER MENU — Full clinical functionality:
