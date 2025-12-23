@@ -36,6 +36,7 @@ public class ClinicianManagementUI extends JFrame {
 
         setLayout(new BorderLayout(10, 10));
 
+        // ===== HEADER =====
         JPanel header = new JPanel(new BorderLayout());
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         header.setBackground(new Color(41, 128, 185));
@@ -47,8 +48,25 @@ public class ClinicianManagementUI extends JFrame {
 
         add(header, BorderLayout.NORTH);
 
+        // ===== SEARCH PANEL (TOP) =====
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+
+        searchPanel.add(new JLabel("Search:"));
+        searchField = new JTextField(20);
+        searchPanel.add(searchField);
+
+        searchButton = new JButton("Search");
+        searchButton.addActionListener(e -> searchClinicians());
+        searchPanel.add(searchButton);
+
+        refreshButton = new JButton("Refresh All");
+        refreshButton.addActionListener(e -> loadClinicians());
+        searchPanel.add(refreshButton);
+
+        // ===== ACTION BUTTONS =====
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        topButtons.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
         addButton = new JButton("Add New Clinician");
         addButton.setBackground(new Color(46, 204, 113));
@@ -68,8 +86,10 @@ public class ClinicianManagementUI extends JFrame {
         deleteButton.addActionListener(e -> deleteSelectedClinician());
         topButtons.add(deleteButton);
 
+        // ===== CENTER PANEL =====
         JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(topButtons, BorderLayout.NORTH);
+        centerPanel.add(searchPanel, BorderLayout.NORTH);
+        centerPanel.add(topButtons, BorderLayout.CENTER);
 
         String[] columns = {
                 "Clinician ID", "First Name", "Last Name", "Title", "Speciality",
@@ -86,48 +106,28 @@ public class ClinicianManagementUI extends JFrame {
         clinicianTable.setRowHeight(25);
 
         JScrollPane scrollPane = new JScrollPane(clinicianTable);
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(scrollPane, BorderLayout.SOUTH);
 
         add(centerPanel, BorderLayout.CENTER);
 
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        searchPanel.add(new JLabel("Search:"));
-        searchField = new JTextField(20);
-        searchPanel.add(searchField);
-
-        searchButton = new JButton("Search");
-        searchButton.addActionListener(e -> searchClinicians());
-        searchPanel.add(searchButton);
-
-        refreshButton = new JButton("Refresh All");
-        refreshButton.addActionListener(e -> loadClinicians());
-        searchPanel.add(refreshButton);
-
-        add(searchPanel, BorderLayout.SOUTH);
-
+        // ===== ROLE-BASED VISIBILITY =====
         if (loggedInClinicianID != null) {
             addButton.setVisible(false);
             deleteButton.setVisible(false);
             searchButton.setVisible(false);
             searchField.setVisible(false);
             refreshButton.setVisible(false);
-
             updateButton.setText("Update My Profile");
         }
-        if ("Patient".equalsIgnoreCase(userRole)) {
-             title = new JLabel("View");
-             title.setFont(new Font("Arial", Font.BOLD, 20));
-             title.setForeground(Color.WHITE);
-             header.add(title, BorderLayout.WEST);
 
+        if ("Patient".equalsIgnoreCase(userRole)) {
+            title.setText("View Clinician");
             addButton.setVisible(false);
             updateButton.setVisible(false);
             deleteButton.setVisible(false);
         }
-
     }
+
 
     private void loadClinicians() {
         tableModel.setRowCount(0);

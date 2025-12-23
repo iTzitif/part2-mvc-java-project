@@ -37,7 +37,6 @@ public class Clinician implements Serializable {
         this.startDate = startDate;
     }
 
-    // Getters
     public String getClinicianID() { return clinicianID; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
@@ -51,7 +50,6 @@ public class Clinician implements Serializable {
     public String getEmploymentStatus() { return employmentStatus; }
     public Date getStartDate() { return startDate; }
 
-    // Setters
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
     public void setTitle(String title) { this.title = title; }

@@ -63,18 +63,9 @@ public class ReferralController {
         return referralService.getReferralsByReferredToClinicianId(referredToClinicianId);
     }
     public boolean updateReferralNotes(String referralId, String notes) {
-        Referral referral = SingletonReferralManager
-                .getInstance()
-                .getReferralByID(referralId);
-
-        if (referral == null) {
-            return false;
-        }
-
-        referral.setNotes(notes);
-        referral.setStatus("Updated"); // optional
-        return true;
+        return referralService.updateReferralNotes(referralId, notes);
     }
+
 
 }
 

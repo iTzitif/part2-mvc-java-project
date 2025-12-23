@@ -56,7 +56,7 @@ public class AppointmentUI extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // Header
+        // ===== HEADER =====
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(52, 152, 219));
         JLabel titleLabel = new JLabel("Appointment Management");
@@ -65,9 +65,13 @@ public class AppointmentUI extends JFrame {
         headerPanel.add(titleLabel);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Search Panel
+        // ===== TOP PANEL (SEARCH + BUTTONS) =====
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Search row
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         searchPanel.add(new JLabel("Search by Patient ID:"));
         patientSearchField = new JTextField(15);
         searchPanel.add(patientSearchField);
@@ -75,9 +79,10 @@ public class AppointmentUI extends JFrame {
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(e -> searchAppointmentsByPatient());
         searchPanel.add(searchButton);
-        add(searchPanel, BorderLayout.SOUTH);
 
-        // Button Panel
+        topPanel.add(searchPanel);
+
+        // Buttons row
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bookButton = new JButton("Book Appointment");
         bookButton.addActionListener(e -> showBookAppointmentDialog());
@@ -95,9 +100,12 @@ public class AppointmentUI extends JFrame {
         refreshButton.addActionListener(e -> loadAppointments());
         buttonPanel.add(refreshButton);
 
-        // Center Panel with table
+        topPanel.add(buttonPanel);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // ===== CENTER PANEL (TABLE) =====
         JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(buttonPanel, BorderLayout.NORTH);
 
         String[] columns = {"Appointment ID", "Patient ID", "Patient Name", "Clinician ID",
                 "Date", "Time", "Duration (min)", "Type", "Facility Id", "Reason", "Notes", "Status"};
@@ -112,17 +120,22 @@ public class AppointmentUI extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(appointmentTable);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
+
         add(centerPanel, BorderLayout.CENTER);
 
+        // ===== ROLE-BASED VISIBILITY =====
         if ("patient".equalsIgnoreCase(userRole)) {
-            bookButton.setEnabled(true);
+            bookButton.setEnabled(false);
             cancelButton.setEnabled(true);
             refreshButton.setEnabled(true);
-        } if ("General Practitioner".equalsIgnoreCase(userRole)) {
+            modifyButton.setVisible(false);
+        } else if ("General Practitioner".equalsIgnoreCase(userRole)) {
             bookButton.setVisible(false);
             cancelButton.setVisible(false);
             refreshButton.setVisible(false);
             modifyButton.setVisible(false);
+        } else if ("Specialist".equalsIgnoreCase(userRole)) {
+            bookButton.setVisible(false);
         }
     }
 
@@ -303,6 +316,13 @@ public class AppointmentUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Please select an appointment to modify");
             return;
         }
+        if ("patient".equalsIgnoreCase(userRole)) {
+            String selectedPatientID = (String) tableModel.getValueAt(selectedRow, 1);
+            if (!loggedInUserID.equals(selectedPatientID)) {
+                JOptionPane.showMessageDialog(this, "You can only modify your own appointments!");
+                return;
+            }
+        }
         // Open the same booking dialog prefilled with selected data
         showModifyAppointmentDialog(selectedRow);
     }
@@ -361,7 +381,5 @@ public class AppointmentUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Appointment modified successfully!");
         }
     }
-
-
 
 }

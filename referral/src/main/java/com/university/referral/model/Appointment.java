@@ -19,10 +19,10 @@ public class Appointment {
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
 
-    // Constructor
     public Appointment(String appointmentId, String patientId, String clinicianId,
                        String facilityId, LocalDate appointmentDate, LocalTime appointmentTime,
-                       int durationMinutes, String appointmentType, String reasonForVisit, String notes) {
+                       int durationMinutes, String appointmentType, String reasonForVisit, String notes)
+    {
         this.appointmentId = appointmentId;
         this.patientId = patientId;
         this.clinicianId = clinicianId;
@@ -42,7 +42,6 @@ public class Appointment {
 
     }
 
-    // Methods to update appointment
     public void reschedule(LocalDate newDate, LocalTime newTime) {
         this.appointmentDate = newDate;
         this.appointmentTime = newTime;
@@ -54,7 +53,6 @@ public class Appointment {
         this.lastModified = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public String getAppointmentId() { return appointmentId; }
     public String getPatientId() { return patientId; }
     public String getClinicianId() { return clinicianId; }

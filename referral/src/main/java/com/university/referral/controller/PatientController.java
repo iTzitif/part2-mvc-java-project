@@ -13,16 +13,35 @@ public class PatientController {
         patientService = new PatientService();
     }
 
-    public boolean registerNewPatient(String name, Date dateOfBirth, String address,
-                                      String phone, String email, String emergencyContact) {
-        String patientID = patientService.generatePatientID();
-        Patient patient = new Patient(patientID, name, dateOfBirth, address,
-                phone, email, emergencyContact);
+    public boolean registerNewPatient(String firstName, String lastName, Date dateOfBirth,
+                                      String nhsNumber, String gender, String phoneNumber,
+                                      String email, String address, String postcode,
+                                      String emergencyContactName, String emergencyContactPhone,
+                                      Date registrationDate, String gpSurgeryId) {
+        String patientId = patientService.generatePatientID();
+        Patient patient = new Patient(patientId, firstName, lastName, dateOfBirth,
+                nhsNumber, gender, phoneNumber, email, address, postcode,
+                emergencyContactName, emergencyContactPhone, registrationDate, gpSurgeryId);
         return patientService.createPatient(patient);
     }
 
-    public Patient findPatient(String patientID) {
-        return patientService.getPatientByID(patientID);
+    public boolean updatePatient(String patientId, String firstName, String lastName, Date dateOfBirth,
+                                 String nhsNumber, String gender, String phoneNumber,
+                                 String email, String address, String postcode,
+                                 String emergencyContactName, String emergencyContactPhone,
+                                 Date registrationDate, String gpSurgeryId) {
+        Patient patient = new Patient(patientId, firstName, lastName, dateOfBirth,
+                nhsNumber, gender, phoneNumber, email, address, postcode,
+                emergencyContactName, emergencyContactPhone, registrationDate, gpSurgeryId);
+        return patientService.updatePatient(patient);
+    }
+
+    public boolean deletePatient(String patientId) {
+        return patientService.deletePatient(patientId);
+    }
+
+    public Patient findPatient(String patientId) {
+        return patientService.getPatientByID(patientId);
     }
 
     public List<Patient> searchPatients(String searchTerm) {
@@ -32,6 +51,8 @@ public class PatientController {
     public List<Patient> getAllPatients() {
         return patientService.getAllPatients();
     }
+
+    public int getPatientCount() {
+        return patientService.getPatientCount();
+    }
 }
-
-

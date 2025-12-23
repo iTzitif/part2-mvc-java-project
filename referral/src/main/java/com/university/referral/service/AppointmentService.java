@@ -177,7 +177,8 @@ public class AppointmentService {
                 appointment.getLastModified().toLocalDate().format(DATE_FORMAT)
         };
         return dataStore.appendData("data/appointments.csv", data);
-    }
+
+}
 
     public Appointment getAppointmentByID(String appointmentId) {
         return appointments.stream()

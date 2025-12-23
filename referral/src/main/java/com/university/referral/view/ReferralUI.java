@@ -42,10 +42,8 @@ public class ReferralUI extends JFrame {
         setTitle("Referral Management");
         setSize(1000, 750);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
-        loadReferrals();
     }
 
     private void initComponents() {
@@ -65,6 +63,7 @@ public class ReferralUI extends JFrame {
             add(createFormPanel(), BorderLayout.CENTER);
         } else {
             add(createTablePanel(), BorderLayout.CENTER);
+            loadReferrals(); // <-- only call here
         }
 
         // Footer info
@@ -72,6 +71,7 @@ public class ReferralUI extends JFrame {
         JLabel infoLabel = new JLabel("Referrals are managed by SingletonReferralManager");
         infoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         infoPanel.add(infoLabel);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         add(infoPanel, BorderLayout.SOUTH);
     }
 

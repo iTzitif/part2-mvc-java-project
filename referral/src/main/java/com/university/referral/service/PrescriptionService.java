@@ -4,15 +4,21 @@ import com.university.referral.model.Prescription;
 import com.university.referral.util.CSVDataStore;
 import com.university.referral.util.NotificationGenerator;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PrescriptionService {
+
+    private static final String PRESCRIPTION_FILE = "data/prescriptions.csv";
+
+    private static final String[] HEADERS = {
+            "prescription_id", "patient_id", "clinician_id", "appointment_id",
+            "prescription_date", "medication_name", "dosage", "frequency",
+            "duration_days", "quantity", "instructions", "pharmacy_name",
+            "status", "issue_date", "collection_date"
+    };
 
     private CSVDataStore dataStore;
     private List<Prescription> prescriptions;
@@ -22,86 +28,61 @@ public class PrescriptionService {
         dataStore = CSVDataStore.getInstance();
         prescriptions = new ArrayList<>();
         notificationGenerator = NotificationGenerator.getInstance();
+
+        File file = new File(PRESCRIPTION_FILE);
+        if (!file.exists()) {
+            dataStore.createFileWithHeaders(PRESCRIPTION_FILE, HEADERS);
+        }
+
         loadPrescriptionsFromFile();
     }
 
+    // ===================== LOAD =====================
     private void loadPrescriptionsFromFile() {
+        List<String[]> rows = dataStore.loadData(PRESCRIPTION_FILE);
 
-        File file = new File("data/prescriptions.csv");
-        if (!file.exists()) {
-            System.out.println("Prescription file does not exist yet. Starting fresh.");
-            return;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-
-            String line;
-            boolean firstLine = true;
-
-            while ((line = br.readLine()) != null) {
-
-                if (firstLine) {
-                    firstLine = false;
-                    continue; // Skip header row
-                }
-
-                String[] v = line.split(",");
-
-                if (v.length < 15) {
-                    System.err.println("Invalid prescription entry: " + line);
-                    continue;
-                }
-
-                try {
-
-                    Prescription prescription = new Prescription(
-                            v[0],                                   // prescription_id
-                            v[1],                                   // patient_id
-                            v[2],                                   // clinician_id
-                            v[3],                                   // appointment_id
-                            parseDate(v[4]),                        // prescription_date
-                            v[5],                                   // medication_name
-                            v[6],                                   // dosage
-                            v[7],                                   // frequency
-                            Integer.parseInt(v[8]),                 // duration_days
-                            v[9],                                   // quantity
-                            v[10],                                  // instructions
-                            v[11],                                  // pharmacy_name
-                            v[12],                                  // status
-                            parseDate(v[13]),                       // issue_date
-                            parseDate(v[14])                        // collection_date
-                    );
-
-                    prescriptions.add(prescription);
-
-                } catch (Exception e) {
-                    System.err.println("Error parsing line: " + line);
-                    e.printStackTrace();
-                }
+        for (String[] v : rows) {
+            if (v.length < 15) {
+                System.err.println("Invalid prescription entry");
+                continue;
             }
 
-            System.out.println("Loaded " + prescriptions.size() + " prescriptions from file.");
+            try {
+                Prescription prescription = new Prescription(
+                        v[0],
+                        v[1],
+                        v[2],
+                        v[3],
+                        parseDate(v[4]),
+                        v[5],
+                        v[6],
+                        v[7],
+                        Integer.parseInt(v[8]),
+                        v[9],
+                        v[10],
+                        v[11],
+                        v[12],
+                        parseDate(v[13]),
+                        parseDate(v[14])
+                );
 
-        } catch (IOException e) {
-            System.err.println("Error reading prescription file: " + e.getMessage());
+                prescriptions.add(prescription);
+
+            } catch (Exception e) {
+                System.err.println("Error parsing prescription row");
+                e.printStackTrace();
+            }
         }
     }
 
-    private LocalDate parseDate(String value) {
-        if (value == null || value.equals("") || value.equals("null"))
-            return null;
-        return LocalDate.parse(value);
-    }
-
+    // ===================== CREATE =====================
     public boolean createPrescription(Prescription prescription) {
         prescriptions.add(prescription);
-
-        // store notification, if any
         notificationGenerator.savePrescriptionToFile(prescription);
-
-        return savePrescriptionToFile(prescription);
+        return dataStore.appendData(PRESCRIPTION_FILE, toCSVArray(prescription));
     }
 
+    // ===================== READ =====================
     public List<Prescription> getPrescriptionsByPatient(String patientId) {
         List<Prescription> result = new ArrayList<>();
         for (Prescription p : prescriptions) {
@@ -125,9 +106,31 @@ public class PrescriptionService {
         return null;
     }
 
-    private boolean savePrescriptionToFile(Prescription p) {
+    // ===================== DELETE =====================
+    public boolean deletePrescription(String prescriptionId) {
+        boolean removed = prescriptions.removeIf(
+                p -> p.getPrescriptionId().equals(prescriptionId)
+        );
+        return removed && rewriteFile();
+    }
 
-        String[] data = {
+    // ===================== FILE REWRITE =====================
+    private boolean rewriteFile() {
+        if (!dataStore.createFileWithHeaders(PRESCRIPTION_FILE, HEADERS)) {
+            return false;
+        }
+
+        for (Prescription p : prescriptions) {
+            if (!dataStore.appendData(PRESCRIPTION_FILE, toCSVArray(p))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ===================== HELPERS =====================
+    private String[] toCSVArray(Prescription p) {
+        return new String[] {
                 p.getPrescriptionId(),
                 p.getPatientId(),
                 p.getClinicianId(),
@@ -144,8 +147,13 @@ public class PrescriptionService {
                 safeDate(p.getIssueDate()),
                 safeDate(p.getCollectionDate())
         };
+    }
 
-        return dataStore.appendData("data/prescriptions.csv", data);
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isEmpty() || value.equalsIgnoreCase("null")) {
+            return null;
+        }
+        return LocalDate.parse(value);
     }
 
     private String safeDate(LocalDate d) {
@@ -160,46 +168,4 @@ public class PrescriptionService {
         prescriptions.clear();
         loadPrescriptionsFromFile();
     }
-    public boolean deletePrescription(String prescriptionId) {
-        // Find the prescription in the in-memory list
-        Prescription toDelete = null;
-        for (Prescription p : prescriptions) {
-            if (p.getPrescriptionId().equals(prescriptionId)) {
-                toDelete = p;
-                break;
-            }
-        }
-
-        if (toDelete == null) {
-            return false; // not found
-        }
-
-        // Remove from list
-        prescriptions.remove(toDelete);
-
-        // Rewrite the CSV file to reflect deletion
-        return saveAllPrescriptionsToFile();
-    }
-    private boolean saveAllPrescriptionsToFile() {
-        // First, overwrite the CSV file with the header
-        String[] header = {
-                "prescription_id", "patient_id", "clinician_id", "appointment_id",
-                "prescription_date", "medication_name", "dosage", "frequency",
-                "duration_days", "quantity", "instructions", "pharmacy_name",
-                "status", "issue_date", "collection_date"
-        };
-
-        if (!dataStore.createFileWithHeaders("data/prescriptions.csv", header)) {
-            return false;
-        }
-
-        // Append all current prescriptions
-        boolean success = true;
-        for (Prescription p : prescriptions) {
-            success &= savePrescriptionToFile(p); // reuse existing method
-        }
-        return success;
-    }
-
-
 }

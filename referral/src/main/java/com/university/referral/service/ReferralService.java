@@ -1,91 +1,83 @@
 package com.university.referral.service;
 
-import com.university.referral.model.MedicalFacility;
 import com.university.referral.model.Referral;
 import com.university.referral.model.SingletonReferralManager;
 import com.university.referral.util.CSVDataStore;
 import com.university.referral.util.NotificationGenerator;
 
-import java.io.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.File;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class ReferralService {
+
+    private static final String REFERRAL_FILE = "data/referrals.csv";
+
+    private static final String[] HEADERS = {
+            "ReferralID","PatientID","ReferringClinicianID","ReferredToClinicianID",
+            "ReferringFacilityID","ReferredToFacilityID","ReferralDate",
+            "UrgencyLevel","ReferralReason","ClinicalSummary",
+            "RequestedInvestigations","Status","AppointmentID",
+            "Notes","CreatedDate","LastUpdated"
+    };
+
+    private static final DateTimeFormatter DATE_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     private SingletonReferralManager referralManager;
     private NotificationGenerator notificationGenerator;
     private CSVDataStore dataStore;
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     public ReferralService() {
         referralManager = SingletonReferralManager.getInstance();
         notificationGenerator = NotificationGenerator.getInstance();
         dataStore = CSVDataStore.getInstance();
+
+        File file = new File(REFERRAL_FILE);
+        if (!file.exists()) {
+            dataStore.createFileWithHeaders(REFERRAL_FILE, HEADERS);
+        }
+
         loadReferralsFromFile();
     }
 
+    // ===================== LOAD =====================
     private void loadReferralsFromFile() {
-        File file = new File("data/referrals.csv");
-        if (!file.exists()) return;
+        List<String[]> rows = dataStore.loadData(REFERRAL_FILE);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // adjust as needed
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            boolean firstLine = true;
-
-            while ((line = br.readLine()) != null) {
-                if (firstLine) { firstLine = false; continue; }
-                String[] values = line.split(",", -1); // include empty fields
-                if (values.length >= 16) {
-                    try {
-                        LocalDate referralDate = LocalDate.parse(values[6], DATE_FORMAT);
-//                        LocalDate createdDate = LocalDate.parse(values[16], DATE_FORMAT);
-//                        LocalDate lastUpdated = LocalDate.parse(values[15], DATE_FORMAT);
-                        Referral referral = new Referral(
-                                values[0], // referral_id
-                                values[1], // patient_id
-                                values[2], // referring_clinician_id
-                                values[3], // referred_to_clinician_id
-                                values[4], // referring_facility_id
-                                values[5], // referred_to_facility_id
-                                referralDate,
-                                values[7], // urgency_level
-                                values[8], // referral_reason
-                                values[9], // clinical_summary
-                                values[10], // requested_investigations
-                                values[11], // status
-                                values[12], // appointment_id
-                                values[13]  // notes
-                        );
-
-                        // Override createdDate and lastUpdated if needed
-                        referralManager.addReferral(referral);
-
-                    } catch (NumberFormatException e) {
-                        System.err.println("Date parsing error in line: " + line);
-                        e.printStackTrace();
-                    }
-                }
+        for (String[] v : rows) {
+            if (v.length >= 16) {
+                Referral referral = new Referral(
+                        v[0],
+                        v[1],
+                        v[2],
+                        v[3],
+                        v[4],
+                        v[5],
+                        LocalDate.parse(v[6], DATE_FORMAT),
+                        v[7],
+                        v[8],
+                        v[9],
+                        v[10],
+                        v[11],
+                        v[12],
+                        v[13]
+                );
+                referralManager.addReferral(referral);
             }
-        } catch (IOException e) {
-            System.err.println("Error reading referrals file: " + e.getMessage());
         }
     }
 
+    // ===================== CREATE =====================
     public boolean createReferral(Referral referral) {
         referralManager.addReferral(referral);
         notificationGenerator.saveReferralToFile(referral);
-        return saveReferralToFile(referral);
+        return dataStore.appendData(REFERRAL_FILE, toCSVArray(referral));
     }
 
+    // ===================== READ =====================
     public List<Referral> getAllReferrals() {
         return referralManager.getAllReferrals();
     }
@@ -93,14 +85,14 @@ public class ReferralService {
     public List<Referral> getReferralsByPatient(String patientId) {
         return referralManager.getReferralsByPatient(patientId);
     }
+
     public List<Referral> getReferralsByClinician(String clinicianId) {
         return referralManager.getReferralsByClinician(clinicianId);
     }
-    public List<Referral> getReferralsByReferredToClinicianId(String referredToClinicianId) {
 
-        return referralManager.getReferralsByReferredToClinicianId(referredToClinicianId);
+    public List<Referral> getReferralsByReferredToClinicianId(String id) {
+        return referralManager.getReferralsByReferredToClinicianId(id);
     }
-
 
     public Referral getReferralByID(String referralId) {
         return referralManager.getReferralByID(referralId);
@@ -110,89 +102,61 @@ public class ReferralService {
         return referralManager.processNextReferral();
     }
 
+    // ===================== UPDATE =====================
     public boolean updateReferralStatus(String referralId, String newStatus) {
         Referral referral = referralManager.getReferralByID(referralId);
-        if (referral != null) {
-            referral.setStatus(newStatus);
-            updateReferralInFile(referral);
-            return true;
+        if (referral == null) return false;
+
+        referral.setStatus(newStatus);
+        return rewriteFile();
+    }
+
+    public boolean updateReferralNotes(String referralId, String notes) {
+        Referral referral = referralManager.getReferralByID(referralId);
+        if (referral == null) return false;
+
+        referral.setNotes(notes);
+        referral.setStatus("Updated");
+        return rewriteFile();
+    }
+
+    // ===================== FILE REWRITE =====================
+    private boolean rewriteFile() {
+        if (!dataStore.createFileWithHeaders(REFERRAL_FILE, HEADERS)) {
+            return false;
         }
-        return false;
-    }
 
-    private void updateReferralInFile(Referral updatedReferral) {
-        File inputFile = new File("data/referrals.csv");
-        File tempFile = new File("data/referrals_temp.csv");
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-
-            String line;
-            boolean firstLine = true;
-
-            while ((line = reader.readLine()) != null) {
-                if (firstLine) { writer.write(line); writer.newLine(); firstLine = false; continue; }
-                String[] values = line.split(",", -1);
-                if (values.length >= 16) {
-                    if (values[0].equals(updatedReferral.getReferral_id())) {
-                        String[] updatedData = {
-                                updatedReferral.getReferral_id(),
-                                updatedReferral.getPatient_id(),
-                                updatedReferral.getReferring_clinician_id(),
-                                updatedReferral.getReferred_to_clinician_id(),
-                                updatedReferral.getReferring_facility_id(),
-                                updatedReferral.getReferred_to_facility_id(),
-                                String.valueOf(updatedReferral.getReferral_date()),
-                                updatedReferral.getUrgency_level(),
-                                updatedReferral.getReferral_reason(),
-                                updatedReferral.getClinical_summary(),
-                                updatedReferral.getRequested_investigations(),
-                                updatedReferral.getStatus(),
-                                updatedReferral.getAppointment_id() != null ? updatedReferral.getAppointment_id() : "",
-                                updatedReferral.getNotes(),
-                                String.valueOf(updatedReferral.getCreated_date()),
-                                String.valueOf(updatedReferral.getLast_updated())
-                        };
-                        writer.write(String.join(",", updatedData));
-                        writer.newLine();
-                    } else {
-                        writer.write(line);
-                        writer.newLine();
-                    }
-                } else {
-                    writer.write(line); writer.newLine();
-                }
+        for (Referral r : referralManager.getAllReferrals()) {
+            if (!dataStore.appendData(REFERRAL_FILE, toCSVArray(r))) {
+                return false;
             }
-
-        } catch (IOException e) { e.printStackTrace(); return; }
-
-        if (inputFile.delete()) tempFile.renameTo(inputFile);
+        }
+        return true;
     }
 
-    private boolean saveReferralToFile(Referral referral) {
-        String[] data = {
-                referral.getReferral_id(),
-                referral.getPatient_id(),
-                referral.getReferring_clinician_id(),
-                referral.getReferred_to_clinician_id(),
-                referral.getReferring_facility_id(),
-                referral.getReferred_to_facility_id(),
-                String.valueOf(referral.getReferral_date()),
-                referral.getUrgency_level(),
-                referral.getReferral_reason(),
-                referral.getClinical_summary(),
-                referral.getRequested_investigations(),
-                referral.getStatus(),
-                referral.getAppointment_id() != null ? referral.getAppointment_id() : "",
-                referral.getNotes(),
-                String.valueOf(referral.getCreated_date()),
-                String.valueOf(referral.getLast_updated())
+    // ===================== HELPERS =====================
+    private String[] toCSVArray(Referral r) {
+        return new String[] {
+                r.getReferral_id(),
+                r.getPatient_id(),
+                r.getReferring_clinician_id(),
+                r.getReferred_to_clinician_id(),
+                r.getReferring_facility_id(),
+                r.getReferred_to_facility_id(),
+                r.getReferral_date().toString(),
+                r.getUrgency_level(),
+                r.getReferral_reason(),
+                r.getClinical_summary(),
+                r.getRequested_investigations(),
+                r.getStatus(),
+                r.getAppointment_id() != null ? r.getAppointment_id() : "",
+                r.getNotes(),
+                r.getCreated_date().toString(),
+                r.getLast_updated().toString()
         };
-        return dataStore.appendData("data/referrals.csv", data);
     }
 
     public String generateReferralID() {
         return "REF" + System.currentTimeMillis();
     }
 }
-

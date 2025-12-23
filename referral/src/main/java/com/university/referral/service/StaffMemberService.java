@@ -3,12 +3,20 @@ package com.university.referral.service;
 import com.university.referral.model.StaffMember;
 import com.university.referral.util.CSVDataStore;
 
-import java.io.*;
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StaffMemberService {
+
+    private static final String STAFF_FILE = "data/staff.csv";
+
+    private static final String[] HEADERS = {
+            "StaffID","FirstName","LastName","Role","Department",
+            "FacilityID","Phone","Email","EmploymentStatus",
+            "StartDate","LineManager","AccessLevel"
+    };
 
     private List<StaffMember> staffMembers;
     private CSVDataStore dataStore;
@@ -16,41 +24,36 @@ public class StaffMemberService {
     public StaffMemberService() {
         staffMembers = new ArrayList<>();
         dataStore = CSVDataStore.getInstance();
+
+        File file = new File(STAFF_FILE);
+        if (!file.exists()) {
+            dataStore.createFileWithHeaders(STAFF_FILE, HEADERS);
+        }
+
         loadStaffFromFile();
     }
 
-    // Load CSV data
+    // Load staff from CSV
     private void loadStaffFromFile() {
-        File file = new File("data/staff.csv");
-        if (!file.exists()) return;
+        List<String[]> rows = dataStore.loadData(STAFF_FILE);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            boolean firstLine = true;
-
-            while ((line = br.readLine()) != null) {
-                if (firstLine) { firstLine = false; continue; } // skip header
-                String[] values = splitCSVLine(line);
-                if (values.length >= 12) {
-                    StaffMember s = new StaffMember(
-                            values[0], // staffId
-                            values[1], // firstName
-                            values[2], // lastName
-                            values[3], // role
-                            values[4], // department
-                            values[5], // facilityId
-                            values[6], // phoneNumber
-                            values[7], // email
-                            values[8], // employmentStatus
-                            LocalDate.parse(values[9]), // startDate
-                            values[10], // lineManager
-                            values[11]  // accessLevel
-                    );
-                    staffMembers.add(s);
-                }
+        for (String[] v : rows) {
+            if (v.length >= 12) {
+                staffMembers.add(new StaffMember(
+                        v[0],
+                        v[1],
+                        v[2],
+                        v[3],
+                        v[4],
+                        v[5],
+                        v[6],
+                        v[7],
+                        v[8],
+                        LocalDate.parse(v[9]),
+                        v[10],
+                        v[11]
+                ));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -67,31 +70,31 @@ public class StaffMemberService {
 
     public boolean addStaffMember(StaffMember staff) {
         staffMembers.add(staff);
-        return saveStaffToFile(staff);
+        return dataStore.appendData(STAFF_FILE, toCSVArray(staff));
     }
 
     public boolean updateStaffMember(StaffMember updatedStaff) {
         for (int i = 0; i < staffMembers.size(); i++) {
             if (staffMembers.get(i).getStaffId().equals(updatedStaff.getStaffId())) {
                 staffMembers.set(i, updatedStaff);
-                return updateStaffInFile(updatedStaff);
+                return rewriteFile();
             }
         }
         return false;
     }
 
     public boolean deleteStaffMember(String staffId) {
-        boolean removed = staffMembers.removeIf(s -> s.getStaffId().equals(staffId));
-        if (removed) {
-            return deleteStaffFromFile(staffId);
-        }
-        return false;
+        boolean removed = staffMembers.removeIf(
+                s -> s.getStaffId().equals(staffId)
+        );
+        return removed && rewriteFile();
     }
 
     public List<StaffMember> searchStaffMembers(String keyword) {
-        if (keyword == null || keyword.isEmpty()) return new ArrayList<>();
-        String lower = keyword.toLowerCase();
         List<StaffMember> results = new ArrayList<>();
+        if (keyword == null || keyword.isEmpty()) return results;
+
+        String lower = keyword.toLowerCase();
         for (StaffMember s : staffMembers) {
             if ((s.getStaffId() != null && s.getStaffId().toLowerCase().contains(lower)) ||
                     (s.getFirstName() != null && s.getFirstName().toLowerCase().contains(lower)) ||
@@ -108,77 +111,23 @@ public class StaffMemberService {
         return "STAFF" + System.currentTimeMillis();
     }
 
-    // Save new staff member to CSV
-    private boolean saveStaffToFile(StaffMember s) {
-        File file = new File("data/staff.csv");
-        boolean writeHeader = !file.exists();
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            if (writeHeader) {
-                bw.write("StaffID,FirstName,LastName,Role,Department,FacilityID,Phone,Email,EmploymentStatus,StartDate,LineManager,AccessLevel");
-                bw.newLine();
-            }
-            bw.write(toCSVLine(s));
-            bw.newLine();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+    // Rewrite entire CSV file
+    private boolean rewriteFile() {
+        if (!dataStore.createFileWithHeaders(STAFF_FILE, HEADERS)) {
             return false;
         }
-    }
 
-    // Update existing staff in CSV
-    private boolean updateStaffInFile(StaffMember updated) {
-        File inputFile = new File("data/staff.csv");
-        File tempFile = new File("data/staff_temp.csv");
-        try (BufferedReader br = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
-
-            String line;
-            boolean firstLine = true;
-            while ((line = br.readLine()) != null) {
-                if (firstLine) { bw.write(line); bw.newLine(); firstLine = false; continue; }
-                String[] values = splitCSVLine(line);
-                if (values.length > 0 && values[0].equals(updated.getStaffId())) {
-                    bw.write(toCSVLine(updated));
-                    bw.newLine();
-                } else {
-                    bw.write(line);
-                    bw.newLine();
-                }
+        for (StaffMember s : staffMembers) {
+            if (!dataStore.appendData(STAFF_FILE, toCSVArray(s))) {
+                return false;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
         }
-        return inputFile.delete() && tempFile.renameTo(inputFile);
+        return true;
     }
 
-    // Delete staff from CSV
-    private boolean deleteStaffFromFile(String staffId) {
-        File inputFile = new File("data/staff.csv");
-        File tempFile = new File("data/staff_temp.csv");
-        try (BufferedReader br = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
-
-            String line;
-            boolean firstLine = true;
-            while ((line = br.readLine()) != null) {
-                if (firstLine) { bw.write(line); bw.newLine(); firstLine = false; continue; }
-                String[] values = splitCSVLine(line);
-                if (values.length > 0 && values[0].equals(staffId)) continue; // skip
-                bw.write(line);
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return inputFile.delete() && tempFile.renameTo(inputFile);
-    }
-
-    // Convert staff member to CSV line
-    private String toCSVLine(StaffMember s) {
-        return String.join(",",
+    // Convert StaffMember to CSV row
+    private String[] toCSVArray(StaffMember s) {
+        return new String[] {
                 s.getStaffId(),
                 s.getFirstName(),
                 s.getLastName(),
@@ -191,22 +140,6 @@ public class StaffMemberService {
                 s.getStartDate().toString(),
                 s.getLineManager(),
                 s.getAccessLevel()
-        );
-    }
-
-    // Split CSV respecting quotes
-    private String[] splitCSVLine(String line) {
-        List<String> tokens = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        boolean inQuotes = false;
-        for (char c : line.toCharArray()) {
-            if (c == '"') inQuotes = !inQuotes;
-            else if (c == ',' && !inQuotes) {
-                tokens.add(sb.toString().trim());
-                sb.setLength(0);
-            } else sb.append(c);
-        }
-        tokens.add(sb.toString().trim());
-        return tokens.toArray(new String[0]);
+        };
     }
 }
