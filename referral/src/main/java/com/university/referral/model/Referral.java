@@ -86,7 +86,6 @@ public class Referral {
         this.last_updated = LocalDate.now();
     }
 
-    // Optional setters for created_date and last_updated
     public void setCreated_date(LocalDate created_date) {
         this.created_date = created_date;
     }

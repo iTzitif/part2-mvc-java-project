@@ -17,7 +17,6 @@ public class CSVDataStore {
         return instance;
     }
 
-    // Load CSV data (skips header)
     public List<String[]> loadData(String filepath) {
         List<String[]> data = new ArrayList<>();
 
@@ -38,7 +37,6 @@ public class CSVDataStore {
         return data;
     }
 
-    // Append a row
     public boolean appendData(String filepath, String[] data) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filepath, true))) {
             bw.write(String.join(",", data));
@@ -50,7 +48,6 @@ public class CSVDataStore {
         }
     }
 
-    // Create / overwrite file with headers
     public boolean createFileWithHeaders(String filepath, String[] headers) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filepath))) {
             bw.write(String.join(",", headers));
@@ -62,7 +59,6 @@ public class CSVDataStore {
         }
     }
 
-    // CSV-safe split (handles quotes)
     private String[] splitCSVLine(String line) {
         List<String> tokens = new ArrayList<>();
         StringBuilder sb = new StringBuilder();

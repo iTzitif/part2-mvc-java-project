@@ -1,4 +1,6 @@
-package com.university.referral.model;
+package com.university.referral.util;
+
+import com.university.referral.model.Referral;
 
 import java.util.*;
 
@@ -22,7 +24,6 @@ public class SingletonReferralManager {
     }
 
     public void addReferral(Referral referral) {
-        // Prevent duplicate referrals by ID
         if (!allReferrals.containsKey(referral.getReferral_id())) {
             allReferrals.put(referral.getReferral_id(), referral);
             referralQueue.offer(referral);

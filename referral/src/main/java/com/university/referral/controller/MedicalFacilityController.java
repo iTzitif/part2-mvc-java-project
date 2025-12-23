@@ -2,7 +2,6 @@ package com.university.referral.controller;
 
 import com.university.referral.model.MedicalFacility;
 import com.university.referral.service.MedicalFacilityService;
-
 import java.util.List;
 
 public class MedicalFacilityController {
@@ -36,9 +35,6 @@ public class MedicalFacilityController {
         return facilityService.generateFacilityID();
     }
 
-    public List<MedicalFacility> searchFacilities(String keyword) {
-        return facilityService.searchFacilities(keyword);
-    }
 }
 
 

@@ -52,7 +52,4 @@ public class PatientController {
         return patientService.getAllPatients();
     }
 
-    public int getPatientCount() {
-        return patientService.getPatientCount();
-    }
 }

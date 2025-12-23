@@ -67,6 +67,4 @@ public class PrescriptionController {
         }
         return prescriptionService.deletePrescription(prescriptionId);
     }
-
-
 }

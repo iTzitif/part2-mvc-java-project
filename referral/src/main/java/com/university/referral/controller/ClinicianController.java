@@ -4,7 +4,6 @@ import com.university.referral.model.Appointment;
 import com.university.referral.model.Clinician;
 import com.university.referral.service.AppointmentService;
 import com.university.referral.service.ClinicianService;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -100,10 +99,6 @@ public class ClinicianController {
         return clinicianService.getAllClinicians();
     }
 
-    public int getClinicianCount() {
-        return clinicianService.getClinicianCount();
-    }
-
     public List<Appointment> getAvailableClinicians(String clinicianID) {
         List<Appointment> appointments = appointmentService.getAppointmentsByClinician(clinicianID);
         if (appointments.isEmpty()) {
@@ -115,6 +110,4 @@ public class ClinicianController {
     public List<Appointment> getClinicianAppointments(String clinicianID) {
         return appointmentService.getAppointmentsByClinician(clinicianID);
     }
-
-
 }

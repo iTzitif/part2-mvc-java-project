@@ -56,7 +56,6 @@ public class AppointmentUI extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // ===== HEADER =====
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(52, 152, 219));
         JLabel titleLabel = new JLabel("Appointment Management");
@@ -65,12 +64,10 @@ public class AppointmentUI extends JFrame {
         headerPanel.add(titleLabel);
         add(headerPanel, BorderLayout.NORTH);
 
-        // ===== TOP PANEL (SEARCH + BUTTONS) =====
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Search row
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.add(new JLabel("Search by Patient ID:"));
         patientSearchField = new JTextField(15);
@@ -82,7 +79,6 @@ public class AppointmentUI extends JFrame {
 
         topPanel.add(searchPanel);
 
-        // Buttons row
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bookButton = new JButton("Book Appointment");
         bookButton.addActionListener(e -> showBookAppointmentDialog());
@@ -104,7 +100,6 @@ public class AppointmentUI extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // ===== CENTER PANEL (TABLE) =====
         JPanel centerPanel = new JPanel(new BorderLayout());
 
         String[] columns = {"Appointment ID", "Patient ID", "Patient Name", "Clinician ID",
@@ -123,7 +118,6 @@ public class AppointmentUI extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // ===== ROLE-BASED VISIBILITY =====
         if ("patient".equalsIgnoreCase(userRole)) {
             bookButton.setEnabled(false);
             cancelButton.setEnabled(true);
@@ -145,7 +139,6 @@ public class AppointmentUI extends JFrame {
         List<Appointment> allAppointments;
 
         if ("patient".equalsIgnoreCase(userRole)) {
-            // Show only appointments for the logged-in patient
             allAppointments = appointmentController.getPatientAppointments(loggedInUserID);
         } else if("Specialist".equalsIgnoreCase(userRole)) {
             allAppointments = clinicianController.getClinicianAppointments(loggedInUserID);
@@ -254,7 +247,6 @@ public class AppointmentUI extends JFrame {
             }
         }
     }
-// test
     private void showBookAppointmentDialog() {
         JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
 
@@ -323,7 +315,6 @@ public class AppointmentUI extends JFrame {
                 return;
             }
         }
-        // Open the same booking dialog prefilled with selected data
         showModifyAppointmentDialog(selectedRow);
     }
     private void showModifyAppointmentDialog(int row) {
@@ -364,7 +355,6 @@ public class AppointmentUI extends JFrame {
                 "Modify Appointment", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            // Update appointment using controller
             appointmentController.updateAppointment(
                     appointmentId,
                     patientIDField.getText().trim(),

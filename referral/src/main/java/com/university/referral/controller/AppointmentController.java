@@ -61,8 +61,7 @@ public class AppointmentController {
                 reason,
                 notes
         );
-        appointment.setStatus("Scheduled"); // Or keep existing status if you prefer
+        appointment.setStatus("Scheduled");
         return appointmentService.rescheduleAppointment(appointment);
     }
-
 }

@@ -34,7 +34,6 @@ public class StaffMemberUI extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // HEADER
         JPanel header = new JPanel(new BorderLayout());
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         header.setBackground(new Color(41, 128, 185));
@@ -44,7 +43,6 @@ public class StaffMemberUI extends JFrame {
         header.add(title, BorderLayout.WEST);
         add(header, BorderLayout.NORTH);
 
-        // TOP BUTTONS
         JPanel topButtons = new JPanel();
         topButtons.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
@@ -74,7 +72,6 @@ public class StaffMemberUI extends JFrame {
         topButtons.add(deleteButton);
         topButtons.add(refreshButton);
 
-        // CENTER PANEL - TABLE
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(topButtons, BorderLayout.NORTH);
 
@@ -96,7 +93,6 @@ public class StaffMemberUI extends JFrame {
         staffTable.setRowHeight(25);
         staffTable.setAutoCreateRowSorter(true);
 
-        // Row striping
         staffTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -113,7 +109,6 @@ public class StaffMemberUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(staffTable);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // STATUS LABEL
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(Color.RED);
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -121,7 +116,6 @@ public class StaffMemberUI extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // SEARCH PANEL
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         searchPanel.add(new JLabel("Search:"));
@@ -135,10 +129,8 @@ public class StaffMemberUI extends JFrame {
 
         add(searchPanel, BorderLayout.SOUTH);
 
-        // Search by Enter key
         searchField.addActionListener(e -> searchStaffMembers());
 
-        // Optional: live search
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) { liveSearch(); }
             public void removeUpdate(DocumentEvent e) { liveSearch(); }

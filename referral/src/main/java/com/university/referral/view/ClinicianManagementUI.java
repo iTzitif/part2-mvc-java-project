@@ -36,7 +36,6 @@ public class ClinicianManagementUI extends JFrame {
 
         setLayout(new BorderLayout(10, 10));
 
-        // ===== HEADER =====
         JPanel header = new JPanel(new BorderLayout());
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         header.setBackground(new Color(41, 128, 185));
@@ -48,7 +47,6 @@ public class ClinicianManagementUI extends JFrame {
 
         add(header, BorderLayout.NORTH);
 
-        // ===== SEARCH PANEL (TOP) =====
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
 
@@ -64,7 +62,6 @@ public class ClinicianManagementUI extends JFrame {
         refreshButton.addActionListener(e -> loadClinicians());
         searchPanel.add(refreshButton);
 
-        // ===== ACTION BUTTONS =====
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topButtons.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
@@ -86,7 +83,6 @@ public class ClinicianManagementUI extends JFrame {
         deleteButton.addActionListener(e -> deleteSelectedClinician());
         topButtons.add(deleteButton);
 
-        // ===== CENTER PANEL =====
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(searchPanel, BorderLayout.NORTH);
         centerPanel.add(topButtons, BorderLayout.CENTER);
@@ -110,7 +106,6 @@ public class ClinicianManagementUI extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // ===== ROLE-BASED VISIBILITY =====
         if (loggedInClinicianID != null) {
             addButton.setVisible(false);
             deleteButton.setVisible(false);
@@ -253,7 +248,6 @@ public class ClinicianManagementUI extends JFrame {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        // --- Form Fields ---
         int y = 0;
 
         JTextField fName = addField(panel, gbc, y++, "First Name: *", existing == null ? "" : existing.getFirstName());
@@ -270,7 +264,6 @@ public class ClinicianManagementUI extends JFrame {
                 existing == null ? sdf.format(new Date()) : sdf.format(existing.getStartDate())
         );
 
-        // Buttons
         gbc.gridx = 0;
         gbc.gridy = y;
         gbc.gridwidth = 2;

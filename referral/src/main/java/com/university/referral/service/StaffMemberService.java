@@ -33,7 +33,6 @@ public class StaffMemberService {
         loadStaffFromFile();
     }
 
-    // Load staff from CSV
     private void loadStaffFromFile() {
         List<String[]> rows = dataStore.loadData(STAFF_FILE);
 
@@ -111,7 +110,6 @@ public class StaffMemberService {
         return "STAFF" + System.currentTimeMillis();
     }
 
-    // Rewrite entire CSV file
     private boolean rewriteFile() {
         if (!dataStore.createFileWithHeaders(STAFF_FILE, HEADERS)) {
             return false;
@@ -125,7 +123,6 @@ public class StaffMemberService {
         return true;
     }
 
-    // Convert StaffMember to CSV row
     private String[] toCSVArray(StaffMember s) {
         return new String[] {
                 s.getStaffId(),

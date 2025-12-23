@@ -25,7 +25,6 @@ public class LoginUI extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Title
         JLabel titleLabel = new JLabel("Healthcare Management System");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(Color.BLUE);
@@ -35,7 +34,6 @@ public class LoginUI extends JFrame {
         mainPanel.add(titleLabel, gbc);
         gbc.gridwidth = 1;
 
-        // Username
         gbc.gridx = 0;
         gbc.gridy = 1;
         mainPanel.add(new JLabel("👤 Username:"), gbc);
@@ -44,7 +42,6 @@ public class LoginUI extends JFrame {
         usernameField = new JTextField(20);
         mainPanel.add(usernameField, gbc);
 
-        // Password
         gbc.gridx = 0;
         gbc.gridy = 2;
         mainPanel.add(new JLabel("🔒 Password:"), gbc);
@@ -53,7 +50,6 @@ public class LoginUI extends JFrame {
         passwordField = new JPasswordField(20);
         mainPanel.add(passwordField, gbc);
 
-        // Role
         gbc.gridx = 0;
         gbc.gridy = 3;
         mainPanel.add(new JLabel("👨‍⚕️ Role:"), gbc);
@@ -69,22 +65,19 @@ public class LoginUI extends JFrame {
         roleComboBox = new JComboBox<>(roles);
         mainPanel.add(roleComboBox, gbc);
 
-        // Login Button
         gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
 
-        gbc.fill = GridBagConstraints.NONE;          // Do NOT stretch
-        gbc.anchor = GridBagConstraints.CENTER;      // Center the button
-        gbc.insets = new Insets(10, 0, 0, 0);        // Small top spacing
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 0, 0, 0);
 
         loginButton = new JButton("Login");
-        loginButton.setPreferredSize(new Dimension(100, 30)); // Smaller size
+        loginButton.setPreferredSize(new Dimension(100, 30));
         loginButton.addActionListener(e -> handleLogin());
 
         mainPanel.add(loginButton, gbc);
-
-
         add(mainPanel);
     }
 

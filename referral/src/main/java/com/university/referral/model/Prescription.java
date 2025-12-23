@@ -46,7 +46,6 @@ public class Prescription {
         this.collectionDate = collectionDate;
     }
 
-    // Getters
     public String getPrescriptionId() { return prescriptionId; }
     public String getPatientId() { return patientId; }
     public String getClinicianId() { return clinicianId; }
@@ -63,7 +62,6 @@ public class Prescription {
     public LocalDate getIssueDate() { return issueDate; }
     public LocalDate getCollectionDate() { return collectionDate; }
 
-    // Setters
     public void setPrescriptionId(String prescriptionId) { this.prescriptionId = prescriptionId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
     public void setClinicianId(String clinicianId) { this.clinicianId = clinicianId; }

@@ -5,7 +5,6 @@ import java.awt.*;
 
 public class MainMenuUI extends JFrame {
     private String userRole;
-    private JPanel buttonPanel;
     private String loggedInUserID;
 
     public MainMenuUI(String role, String userID) {
@@ -20,16 +19,13 @@ public class MainMenuUI extends JFrame {
     }
 
     private void initComponents() {
-        // Main container with white background
         JPanel mainContainer = new JPanel(new BorderLayout());
         mainContainer.setBackground(Color.WHITE);
 
-        // HEADER PANEL - Modern healthcare header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(0, 123, 255));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
 
-        // Left side: Welcome text
         JPanel welcomePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         welcomePanel.setBackground(new Color(0, 123, 255));
         JLabel welcomeLabel = new JLabel("Welcome, " + userRole);
@@ -38,7 +34,6 @@ public class MainMenuUI extends JFrame {
         welcomePanel.add(welcomeLabel);
         headerPanel.add(welcomePanel, BorderLayout.WEST);
 
-        // Right side: User ID and logout
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         userPanel.setBackground(new Color(0, 123, 255));
         JLabel userLabel = new JLabel("ID: " + loggedInUserID);
@@ -54,7 +49,6 @@ public class MainMenuUI extends JFrame {
         userPanel.add(logoutBtn);
         headerPanel.add(userPanel, BorderLayout.EAST);
 
-        // TITLE PANEL
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(Color.WHITE);
         titlePanel.setBorder(BorderFactory.createEmptyBorder(30, 20, 20, 20));
@@ -64,26 +58,21 @@ public class MainMenuUI extends JFrame {
         titleLabel.setForeground(new Color(33, 37, 41));
         titlePanel.add(titleLabel);
 
-        // MAIN CONTENT PANEL - Cards layout
         JPanel contentPanel = new JPanel();
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
 
-        // Create sections based on user role
         createMenuSections(contentPanel);
 
-        // Add all panels to main container
         mainContainer.add(headerPanel, BorderLayout.NORTH);
         mainContainer.add(titlePanel, BorderLayout.CENTER);
         mainContainer.add(contentPanel, BorderLayout.SOUTH);
 
-        // Add scroll pane for many buttons
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        // Replace content panel with scrollable version
         mainContainer.remove(contentPanel);
         mainContainer.add(scrollPane, BorderLayout.CENTER);
 
@@ -91,12 +80,10 @@ public class MainMenuUI extends JFrame {
     }
 
     private void createMenuSections(JPanel contentPanel) {
-        // Create role-specific sections
         String sectionTitle = getRoleSectionTitle();
         contentPanel.add(createSectionHeader(sectionTitle));
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // Create button grid
         JPanel gridPanel = new JPanel(new GridLayout(0, 3, 15, 15));
         gridPanel.setBackground(Color.WHITE);
         gridPanel.setMaximumSize(new Dimension(700, Integer.MAX_VALUE));
@@ -106,7 +93,6 @@ public class MainMenuUI extends JFrame {
         contentPanel.add(gridPanel);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // Add universal options in a separate section
         contentPanel.add(createSectionHeader("System Tools"));
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -135,7 +121,6 @@ public class MainMenuUI extends JFrame {
     }
 
     private void createMenuButtons(JPanel gridPanel) {
-        // PATIENT MENU
         if (userRole.equals("Patient")) {
             addMenuCard(gridPanel, "👤 Manage Profile", "Update personal information", e -> manageProfile());
             addMenuCard(gridPanel, "🔍 Search Clinician", "Find and view clinicians", e -> searchClinician());
@@ -144,16 +129,12 @@ public class MainMenuUI extends JFrame {
             addMenuCard(gridPanel, "🏥 View Appointment", "View appointments", e -> openAppointmentBooking());
             addMenuCard(gridPanel, "💊 View Prescription", "View prescriptions", e -> viewPrescriptionPatient());
         }
-
-        // SPECIALIST MENU
         else if (userRole.equals("Specialist")) {
             addMenuCard(gridPanel, "📅 View Schedule", "Appointment schedule", e -> openAppointmentBooking());
             addMenuCard(gridPanel, "📋 View Referrals", "Review patient referrals", e -> viewReferrals());
             addMenuCard(gridPanel, "✏️ Create Referrals", "Create new referrals", e -> createReferral());
             addMenuCard(gridPanel, "📥 Receive Referral", "Accept incoming referrals", e -> receiveReferral());
         }
-
-        // GENERAL PRACTITIONER MENU
         else if (userRole.equals("General Practitioner")) {
             addMenuCard(gridPanel, "📅 View Schedule", "Appointment schedule", e -> openAppointmentView());
             addMenuCard(gridPanel, "👥 Patient List", "View patient directory", e -> viewPatientList());
@@ -163,8 +144,6 @@ public class MainMenuUI extends JFrame {
             addMenuCard(gridPanel, "📝 Create Referral", "Refer to specialists", e -> createReferral());
             addMenuCard(gridPanel, "📋 Update Notes", "Update clinical notes", e -> viewReferrals());
         }
-
-        // RECEPTIONIST MENU
         else if (userRole.equals("Receptionist")) {
             addMenuCard(gridPanel, "👤 Register Patient", "New patient registration", e -> openPatientRegistration());
             addMenuCard(gridPanel, "👁️ View Patients", "Access patient details", e -> viewPatientBasicDetails());
@@ -175,8 +154,6 @@ public class MainMenuUI extends JFrame {
             addMenuCard(gridPanel, "🏥 Facilities", "View facility list", e -> viewFacilityList());
             addMenuCard(gridPanel, "✏️ Create Facility", "Create new Facility", e -> createFacility());
         }
-
-        // NURSE MENU
         else if (userRole.equals("Nurse")) {
             addMenuCard(gridPanel, "❤️ Record Vitals", "Record patient vitals", e -> recordVitals());
             addMenuCard(gridPanel, "📋 Medical Records", "Access patient records", e -> viewMedicalRecords());
@@ -194,7 +171,6 @@ public class MainMenuUI extends JFrame {
         card.setPreferredSize(new Dimension(200, 120));
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Title with icon
         String[] parts = title.split(" ", 2);
         String icon = parts[0];
         String text = parts.length > 1 ? parts[1] : "";
@@ -203,14 +179,12 @@ public class MainMenuUI extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         titleLabel.setIcon(new ImageIcon(getIconText(icon)));
 
-        // Description
         JLabel descLabel = new JLabel("<html><font color='#6c757d' size='2'>" + description + "</font></html>");
         descLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
 
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(descLabel, BorderLayout.CENTER);
 
-        // Add hover effect
         card.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 card.setBorder(BorderFactory.createCompoundBorder(
@@ -228,7 +202,6 @@ public class MainMenuUI extends JFrame {
             }
         });
 
-        // Add click listener
         card.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 action.actionPerformed(new java.awt.event.ActionEvent(card, 0, ""));
@@ -277,49 +250,7 @@ public class MainMenuUI extends JFrame {
     }
 
     private String getIconText(String icon) {
-        // For simplicity, using emoji icons. In production, use actual icons.
         return icon;
-    }
-
-    // All existing methods remain the same from here...
-    private void cancelAppointment() {
-        // Implementation
-    }
-
-    private void openFacilityRegistration() {
-        // Implementation
-    }
-
-    private void viewStaffList() {
-        // Implementation
-    }
-
-    private void deleteStaff() {
-        // Implementation
-    }
-
-    private void editStaff() {
-        // Implementation
-    }
-
-    private void editFacility() {
-        // Implementation
-    }
-
-    private void deleteFacility() {
-        // Implementation
-    }
-
-    private void editAppointment() {
-        // Implementation
-    }
-
-    private void deletePatient() {
-        // Implementation
-    }
-
-    private void editPatient() {
-        // Implementation
     }
 
     private void openStaffRegistration() {
@@ -334,14 +265,6 @@ public class MainMenuUI extends JFrame {
 
     private void viewFacilityList() {
         new MedicalFacilityUI().setVisible(true);
-    }
-
-    private void deletePrescription() {
-        // Implementation
-    }
-
-    private void editPrescription() {
-        // Implementation
     }
 
     private void viewPatientList() {
@@ -362,7 +285,6 @@ public class MainMenuUI extends JFrame {
     private void viewPrescriptionPatient() {
         new PrescriptionUI(loggedInUserID).setVisible(true);
     }
-
 
     private void openReferralUI() {
         new ReferralUI().setVisible(true);
@@ -431,44 +353,8 @@ public class MainMenuUI extends JFrame {
         JOptionPane.showMessageDialog(this, "Print Feature");
     }
 
-    private void receiveNotifications() {
-        JOptionPane.showMessageDialog(this, "Notifications");
-    }
-
-    private void requestConsent() {
-        JOptionPane.showMessageDialog(this, "Request Consent");
-    }
-
-    private void sendReferral() {
-        JOptionPane.showMessageDialog(this, "Send Referral");
-    }
-
-    private void updateClinicalNotes() {
-        JOptionPane.showMessageDialog(this, "Update Clinical Notes");
-    }
-
-    private void manageWaitingList() {
-        JOptionPane.showMessageDialog(this, "Waiting List");
-    }
-
     private void viewPatientBasicDetails() {
         new PatientManagementUI(userRole).setVisible(true);
-    }
-
-    private void viewReferredPatients() {
-        JOptionPane.showMessageDialog(this, "Referred Patients");
-    }
-
-    private void manageClinicSchedule() {
-        JOptionPane.showMessageDialog(this, "Manage Clinic Schedule");
-    }
-
-    private void generateReports() {
-        JOptionPane.showMessageDialog(this, "Generate Reports");
-    }
-
-    private void sendNotifications() {
-        JOptionPane.showMessageDialog(this, "Send Notifications");
     }
 
     private void logout() {

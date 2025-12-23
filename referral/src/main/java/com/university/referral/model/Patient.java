@@ -21,7 +21,6 @@ public class Patient {
     private String gpSurgeryId;
 
     private List<Appointment> appointments;
-    private List<MedicalRecord> medicalRecords;
 
     public Patient(String patientId, String firstName, String lastName, Date dateOfBirth,
                    String nhsNumber, String gender, String phoneNumber, String email,
@@ -42,22 +41,8 @@ public class Patient {
         this.registrationDate = registrationDate;
         this.gpSurgeryId = gpSurgeryId;
         this.appointments = new ArrayList<>();
-        this.medicalRecords = new ArrayList<>();
     }
 
-    public void bookAppointment(Appointment appointment) {
-        appointments.add(appointment);
-    }
-
-    public void cancelAppointment(String appointmentId) {
-        appointments.removeIf(apt -> apt.getAppointmentId().equals(appointmentId));
-    }
-
-    public void viewMedicalRecord() {
-        // Implementation for viewing records
-    }
-
-    // Getters and setters
     public String getPatientId() { return patientId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
@@ -73,7 +58,4 @@ public class Patient {
     public Date getRegistrationDate() { return registrationDate; }
     public String getGpSurgeryId() { return gpSurgeryId; }
     public List<Appointment> getAppointments() { return appointments; }
-    public List<MedicalRecord> getMedicalRecords() { return medicalRecords; }
-
-    // Optionally, you can add setters if mutability is required
 }

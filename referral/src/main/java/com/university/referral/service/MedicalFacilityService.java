@@ -1,11 +1,9 @@
 package com.university.referral.service;
 
 import com.university.referral.model.MedicalFacility;
-import com.university.referral.model.StaffMember;
 import com.university.referral.util.CSVDataStore;
 
 import java.io.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,6 @@ public class MedicalFacilityService {
         loadFacilitiesFromFile();
     }
 
-    // Load CSV data
     private void loadFacilitiesFromFile() {
         File file = new File("data/facilities.csv");
         if (!file.exists()) return;
@@ -30,7 +27,7 @@ public class MedicalFacilityService {
             boolean firstLine = true;
 
             while ((line = br.readLine()) != null) {
-                if (firstLine) { firstLine = false; continue; } // skip header
+                if (firstLine) { firstLine = false; continue; }
                 String[] values = splitCSVLine(line);
                 if (values.length >= 11) {
                     MedicalFacility f = new MedicalFacility();
@@ -87,26 +84,10 @@ public class MedicalFacilityService {
         return false;
     }
 
-    public List<MedicalFacility> searchFacilities(String keyword) {
-        if (keyword == null || keyword.isEmpty()) return new ArrayList<>();
-        String lower = keyword.toLowerCase();
-        List<MedicalFacility> results = new ArrayList<>();
-        for (MedicalFacility f : facilities) {
-            if ((f.getFacilityId() != null && f.getFacilityId().toLowerCase().contains(lower)) ||
-                    (f.getFacilityName() != null && f.getFacilityName().toLowerCase().contains(lower)) ||
-                    (f.getFacilityType() != null && f.getFacilityType().toLowerCase().contains(lower)) ||
-                    (f.getSpecialitiesOffered() != null && f.getSpecialitiesOffered().toLowerCase().contains(lower))) {
-                results.add(f);
-            }
-        }
-        return results;
-    }
-
     public String generateFacilityID() {
         return "FAC" + System.currentTimeMillis();
     }
 
-    // Save new facility to CSV
     private boolean saveFacilityToFile(MedicalFacility f) {
         File file = new File("data/facilities.csv");
         boolean writeHeader = !file.exists();
@@ -124,7 +105,6 @@ public class MedicalFacilityService {
         }
     }
 
-    // Update existing facility in CSV
     private boolean updateFacilityInFile(MedicalFacility updated) {
         File inputFile = new File("data/facilities.csv");
         File tempFile = new File("data/facilities_temp.csv");
@@ -151,7 +131,6 @@ public class MedicalFacilityService {
         return inputFile.delete() && tempFile.renameTo(inputFile);
     }
 
-    // Delete facility from CSV
     private boolean deleteFacilityFromFile(String facilityId) {
         File inputFile = new File("data/facilities.csv");
         File tempFile = new File("data/facilities_temp.csv");
@@ -174,7 +153,6 @@ public class MedicalFacilityService {
         return inputFile.delete() && tempFile.renameTo(inputFile);
     }
 
-    // Convert facility to CSV line
     private String toCSVLine(MedicalFacility f) {
         return String.join(",",
                 f.getFacilityId(),
@@ -190,8 +168,6 @@ public class MedicalFacilityService {
                 f.getSpecialitiesOffered()
         );
     }
-
-    // Split CSV respecting quotes
     private String[] splitCSVLine(String line) {
         List<String> tokens = new ArrayList<>();
         StringBuilder sb = new StringBuilder();

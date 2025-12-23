@@ -1,9 +1,7 @@
 package com.university.referral.controller;
 
 import com.university.referral.model.Referral;
-import com.university.referral.model.SingletonReferralManager;
 import com.university.referral.service.ReferralService;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -65,8 +63,6 @@ public class ReferralController {
     public boolean updateReferralNotes(String referralId, String notes) {
         return referralService.updateReferralNotes(referralId, notes);
     }
-
-
 }
 
 

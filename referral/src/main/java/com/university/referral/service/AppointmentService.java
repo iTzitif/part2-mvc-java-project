@@ -32,7 +32,6 @@ public class AppointmentService {
             System.out.println("Appointments file does not exist yet. Starting fresh.");
             return;
         }
-
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             boolean firstLine = true;
@@ -226,11 +225,6 @@ public class AppointmentService {
 
     public String generateAppointmentID() {
         return "APT" + System.currentTimeMillis();
-    }
-
-    public void refreshAppointments() {
-        appointments.clear();
-        loadAppointmentsFromFile();
     }
 
     public List<Appointment> getAllAppointments() {

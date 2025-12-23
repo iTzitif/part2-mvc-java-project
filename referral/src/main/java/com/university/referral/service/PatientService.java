@@ -283,17 +283,4 @@ public class PatientService {
     public String generatePatientID() {
         return "PAT" + System.currentTimeMillis();
     }
-
-    public void refreshPatients() {
-        patients.clear();
-        loadPatientsFromFile();
-    }
-
-    public int getPatientCount() {
-        return patients.size();
-    }
-
-    public boolean patientExists(String patientId) {
-        return getPatientByID(patientId) != null;
-    }
 }

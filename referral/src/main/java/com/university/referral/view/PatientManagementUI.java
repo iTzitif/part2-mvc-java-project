@@ -178,7 +178,6 @@ public class PatientManagementUI extends JFrame {
             return;
         }
 
-        // Patient self-profile
         Patient p = patientController.findPatient(loggedInPatientID);
         if (p == null) {
             JOptionPane.showMessageDialog(this, "Patient not found!");

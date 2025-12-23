@@ -1,7 +1,7 @@
 package com.university.referral.view;
 
 import com.university.referral.controller.ReferralController;
-import com.university.referral.model.SingletonReferralManager;
+import com.university.referral.util.SingletonReferralManager;
 import com.university.referral.model.Referral;
 
 import javax.swing.*;
@@ -49,7 +49,6 @@ public class ReferralUI extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // Header
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(52, 152, 219));
         JLabel titleLabel = new JLabel("Referral Management");
@@ -58,15 +57,13 @@ public class ReferralUI extends JFrame {
         headerPanel.add(titleLabel);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Main content
         if ("createReferral".equalsIgnoreCase(type)) {
             add(createFormPanel(), BorderLayout.CENTER);
         } else {
             add(createTablePanel(), BorderLayout.CENTER);
-            loadReferrals(); // <-- only call here
+            loadReferrals();
         }
 
-        // Footer info
         JPanel infoPanel = new JPanel();
         JLabel infoLabel = new JLabel("Referrals are managed by SingletonReferralManager");
         infoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -75,7 +72,6 @@ public class ReferralUI extends JFrame {
         add(infoPanel, BorderLayout.SOUTH);
     }
 
-    // ---------------- Form Panel ----------------
     private JPanel createFormPanel() {
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(BorderFactory.createTitledBorder("Create New Referral"));
@@ -130,7 +126,6 @@ public class ReferralUI extends JFrame {
         return y + 1;
     }
 
-    // ---------------- Table Panel ----------------
     private JPanel createTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBorder(BorderFactory.createTitledBorder("All Referrals"));
@@ -184,7 +179,6 @@ public class ReferralUI extends JFrame {
         return tablePanel;
     }
 
-    // ---------------- Referral Operations ----------------
     private void createReferral() {
         try {
             String patientId = patientIDField.getText().trim();
@@ -285,7 +279,6 @@ public class ReferralUI extends JFrame {
         notesArea.setText("");
     }
 
-    // ---------------- Notes Editing ----------------
     private void enableNotesEditing() {
         int selectedRow = referralTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -319,7 +312,6 @@ public class ReferralUI extends JFrame {
         }
     }
 
-    // ---------------- Main ----------------
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ReferralUI("Admin", "admin01", "createReferral").setVisible(true));
     }

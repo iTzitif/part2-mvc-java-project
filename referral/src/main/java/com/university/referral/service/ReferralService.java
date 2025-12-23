@@ -1,14 +1,13 @@
 package com.university.referral.service;
 
 import com.university.referral.model.Referral;
-import com.university.referral.model.SingletonReferralManager;
+import com.university.referral.util.SingletonReferralManager;
 import com.university.referral.util.CSVDataStore;
 import com.university.referral.util.NotificationGenerator;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReferralService {
@@ -43,7 +42,6 @@ public class ReferralService {
         loadReferralsFromFile();
     }
 
-    // ===================== LOAD =====================
     private void loadReferralsFromFile() {
         List<String[]> rows = dataStore.loadData(REFERRAL_FILE);
 
@@ -70,14 +68,12 @@ public class ReferralService {
         }
     }
 
-    // ===================== CREATE =====================
     public boolean createReferral(Referral referral) {
         referralManager.addReferral(referral);
         notificationGenerator.saveReferralToFile(referral);
         return dataStore.appendData(REFERRAL_FILE, toCSVArray(referral));
     }
 
-    // ===================== READ =====================
     public List<Referral> getAllReferrals() {
         return referralManager.getAllReferrals();
     }
@@ -94,23 +90,6 @@ public class ReferralService {
         return referralManager.getReferralsByReferredToClinicianId(id);
     }
 
-    public Referral getReferralByID(String referralId) {
-        return referralManager.getReferralByID(referralId);
-    }
-
-    public Referral processNextReferral() {
-        return referralManager.processNextReferral();
-    }
-
-    // ===================== UPDATE =====================
-    public boolean updateReferralStatus(String referralId, String newStatus) {
-        Referral referral = referralManager.getReferralByID(referralId);
-        if (referral == null) return false;
-
-        referral.setStatus(newStatus);
-        return rewriteFile();
-    }
-
     public boolean updateReferralNotes(String referralId, String notes) {
         Referral referral = referralManager.getReferralByID(referralId);
         if (referral == null) return false;
@@ -120,7 +99,6 @@ public class ReferralService {
         return rewriteFile();
     }
 
-    // ===================== FILE REWRITE =====================
     private boolean rewriteFile() {
         if (!dataStore.createFileWithHeaders(REFERRAL_FILE, HEADERS)) {
             return false;
@@ -134,7 +112,6 @@ public class ReferralService {
         return true;
     }
 
-    // ===================== HELPERS =====================
     private String[] toCSVArray(Referral r) {
         return new String[] {
                 r.getReferral_id(),
@@ -155,7 +132,6 @@ public class ReferralService {
                 r.getLast_updated().toString()
         };
     }
-
     public String generateReferralID() {
         return "REF" + System.currentTimeMillis();
     }

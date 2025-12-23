@@ -37,7 +37,6 @@ public class PrescriptionService {
         loadPrescriptionsFromFile();
     }
 
-    // ===================== LOAD =====================
     private void loadPrescriptionsFromFile() {
         List<String[]> rows = dataStore.loadData(PRESCRIPTION_FILE);
 
@@ -75,14 +74,12 @@ public class PrescriptionService {
         }
     }
 
-    // ===================== CREATE =====================
     public boolean createPrescription(Prescription prescription) {
         prescriptions.add(prescription);
         notificationGenerator.savePrescriptionToFile(prescription);
         return dataStore.appendData(PRESCRIPTION_FILE, toCSVArray(prescription));
     }
 
-    // ===================== READ =====================
     public List<Prescription> getPrescriptionsByPatient(String patientId) {
         List<Prescription> result = new ArrayList<>();
         for (Prescription p : prescriptions) {
@@ -106,7 +103,6 @@ public class PrescriptionService {
         return null;
     }
 
-    // ===================== DELETE =====================
     public boolean deletePrescription(String prescriptionId) {
         boolean removed = prescriptions.removeIf(
                 p -> p.getPrescriptionId().equals(prescriptionId)
@@ -114,7 +110,6 @@ public class PrescriptionService {
         return removed && rewriteFile();
     }
 
-    // ===================== FILE REWRITE =====================
     private boolean rewriteFile() {
         if (!dataStore.createFileWithHeaders(PRESCRIPTION_FILE, HEADERS)) {
             return false;
@@ -128,7 +123,6 @@ public class PrescriptionService {
         return true;
     }
 
-    // ===================== HELPERS =====================
     private String[] toCSVArray(Prescription p) {
         return new String[] {
                 p.getPrescriptionId(),
@@ -164,8 +158,4 @@ public class PrescriptionService {
         return "PRX" + System.currentTimeMillis();
     }
 
-    public void refreshPrescriptions() {
-        prescriptions.clear();
-        loadPrescriptionsFromFile();
-    }
 }

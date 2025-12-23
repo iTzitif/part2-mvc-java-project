@@ -11,11 +11,8 @@ public class FileIOHandler {
 
     public static boolean writeToFile(String filepath, String content) {
         try {
-            // Create directory if it doesn't exist
             Path path = Paths.get(filepath);
             Files.createDirectories(path.getParent());
-
-            // Write content to file
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
                 writer.write(content);
                 return true;
@@ -38,6 +35,4 @@ public class FileIOHandler {
         }
         return content.toString();
     }
-
-
 }

@@ -36,7 +36,6 @@ public class MedicalFacilityUI extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // HEADER
         JPanel header = new JPanel(new BorderLayout());
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         header.setBackground(new Color(41, 128, 185));
@@ -46,7 +45,6 @@ public class MedicalFacilityUI extends JFrame {
         header.add(title, BorderLayout.WEST);
         add(header, BorderLayout.NORTH);
 
-        // TOP BUTTONS
         JPanel topButtons = new JPanel();
         topButtons.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
@@ -70,13 +68,12 @@ public class MedicalFacilityUI extends JFrame {
         createButton.setFocusPainted(false);
         createButton.addActionListener(e -> createFacility());
 
-        topButtons.add(createButton, 0); // Add it at the beginning
+        topButtons.add(createButton, 0);
 
         topButtons.add(updateButton);
         topButtons.add(deleteButton);
         topButtons.add(refreshButton);
 
-        // CENTER PANEL - TABLE
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(topButtons, BorderLayout.NORTH);
 
@@ -97,7 +94,6 @@ public class MedicalFacilityUI extends JFrame {
         facilityTable.setRowHeight(25);
         facilityTable.setAutoCreateRowSorter(true);
 
-        // Row striping
         facilityTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -114,7 +110,6 @@ public class MedicalFacilityUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(facilityTable);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // STATUS LABEL
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(Color.RED);
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -122,7 +117,6 @@ public class MedicalFacilityUI extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // SEARCH PANEL
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         searchPanel.add(new JLabel("Search:"));
@@ -136,10 +130,8 @@ public class MedicalFacilityUI extends JFrame {
 
         add(searchPanel, BorderLayout.SOUTH);
 
-        // Search by Enter key
         searchField.addActionListener(e -> searchFacilities());
 
-        // Optional: live search
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) { liveSearch(); }
             public void removeUpdate(DocumentEvent e) { liveSearch(); }
@@ -243,7 +235,6 @@ public class MedicalFacilityUI extends JFrame {
             return;
         }
 
-        // Simple update dialog
         JTextField nameField = new JTextField(facility.getFacilityName());
         JTextField typeField = new JTextField(facility.getFacilityType());
         JTextField addressField = new JTextField(facility.getAddress());
@@ -288,7 +279,6 @@ public class MedicalFacilityUI extends JFrame {
         }
     }
     private void createFacility() {
-        // Empty fields for new facility
         JTextField nameField = new JTextField();
         JTextField typeField = new JTextField();
         JTextField addressField = new JTextField();
@@ -343,7 +333,6 @@ public class MedicalFacilityUI extends JFrame {
             }
         }
     }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MedicalFacilityUI().setVisible(true));

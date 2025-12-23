@@ -21,9 +21,6 @@ public class ClinicianService {
         loadCliniciansFromFile();
     }
 
-    // =====================================================
-    // LOAD FROM FILE
-    // =====================================================
     private void loadCliniciansFromFile() {
         File file = new File("data/clinicians.csv");
         if (!file.exists()) {
@@ -83,9 +80,6 @@ public class ClinicianService {
         }
     }
 
-    // =====================================================
-    // CREATE / SAVE
-    // =====================================================
     public boolean createClinician(Clinician clinician) {
         clinicians.add(clinician);
         return saveClinicianToFile(clinician);
@@ -110,9 +104,6 @@ public class ClinicianService {
         return dataStore.appendData("data/clinicians.csv", data);
     }
 
-    // =====================================================
-    // UPDATE
-    // =====================================================
     public boolean updateClinician(Clinician updated) {
         for (int i = 0; i < clinicians.size(); i++) {
             if (clinicians.get(i).getClinicianID().equals(updated.getClinicianID())) {
@@ -183,9 +174,6 @@ public class ClinicianService {
         temp.renameTo(input);
     }
 
-    // =====================================================
-    // DELETE
-    // =====================================================
     public boolean deleteClinician(String clinicianID) {
         Clinician c = getClinicianByID(clinicianID);
 
@@ -233,9 +221,6 @@ public class ClinicianService {
         temp.renameTo(input);
     }
 
-    // =====================================================
-    // SEARCH
-    // =====================================================
     public List<Clinician> searchClinicians(String term) {
         List<Clinician> results = new ArrayList<>();
         String t = term.toLowerCase();
@@ -252,9 +237,6 @@ public class ClinicianService {
         return results;
     }
 
-    // =====================================================
-    // GETTERS
-    // =====================================================
     public Clinician getClinicianByID(String id) {
         for (Clinician c : clinicians) {
             if (c.getClinicianID().equals(id)) return c;
@@ -266,25 +248,8 @@ public class ClinicianService {
         return new ArrayList<>(clinicians);
     }
 
-
-    // =====================================================
-    // UTILITIES
-    // =====================================================
     public String generateClinicianID() {
         return "CLN" + System.currentTimeMillis();
-    }
-
-    public void refreshClinicians() {
-        clinicians.clear();
-        loadCliniciansFromFile();
-    }
-
-    public int getClinicianCount() {
-        return clinicians.size();
-    }
-
-    public boolean clinicianExists(String clinicianID) {
-        return getClinicianByID(clinicianID) != null;
     }
 
     private Date parseDate(String dateStr) {
@@ -294,8 +259,4 @@ public class ClinicianService {
             return new Date();
         }
     }
-    public List<Clinician> getAllClinicianAvailability() {
-        return new ArrayList<>(clinicians); // clinicians is your stored list
-    }
-
 }
