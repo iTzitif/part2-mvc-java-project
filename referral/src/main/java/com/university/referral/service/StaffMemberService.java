@@ -1,5 +1,6 @@
 package com.university.referral.service;
 
+import com.university.referral.model.Clinician;
 import com.university.referral.model.StaffMember;
 import com.university.referral.util.CSVDataStore;
 
@@ -65,6 +66,14 @@ public class StaffMemberService {
                 .filter(s -> s.getStaffId().equals(staffId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public boolean validateStaffMemberLogin(String clinicianId) {
+        for (StaffMember s : staffMembers) {
+            if (s.getStaffId().equals(clinicianId))
+                return true;
+        }
+        return false;
     }
 
     public boolean addStaffMember(StaffMember staff) {
@@ -139,4 +148,6 @@ public class StaffMemberService {
                 s.getAccessLevel()
         };
     }
+
+
 }

@@ -1,16 +1,22 @@
 package com.university.referral.controller;
 
 import com.university.referral.model.*;
+import com.university.referral.service.ClinicianService;
 import com.university.referral.service.PatientService;
+import com.university.referral.service.StaffMemberService;
 
 import java.util.Date;
 import java.util.List;
 
 public class PatientController {
     private PatientService patientService;
+    private ClinicianService clinicianService;
+    private StaffMemberService staffMemberService;
 
     public PatientController() {
         patientService = new PatientService();
+        clinicianService = new ClinicianService();
+        staffMemberService = new StaffMemberService();
     }
 
     public boolean registerNewPatient(String firstName, String lastName, Date dateOfBirth,
@@ -50,6 +56,18 @@ public class PatientController {
 
     public List<Patient> getAllPatients() {
         return patientService.getAllPatients();
+    }
+
+    public boolean authenticate(String username, String role) {
+
+        if ("Patient".equalsIgnoreCase(role)) {
+            return patientService.validatePatientLogin(username);
+        }
+        else if("Specialist".equalsIgnoreCase(role)) {
+            return clinicianService.validateClinicianLogin(username);
+        } else {
+            return staffMemberService.validateStaffMemberLogin(username);
+        }
     }
 
 }

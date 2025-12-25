@@ -231,6 +231,15 @@ public class PatientService {
         return null;
     }
 
+    public boolean validatePatientLogin(String patientId) {
+        for (Patient patient : patients) {
+            if (patient.getPatientId().equals(patientId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Patient> getAllPatients() {
         return new ArrayList<>(patients);
     }

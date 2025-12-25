@@ -1,6 +1,7 @@
 package com.university.referral.service;
 
 import com.university.referral.model.Clinician;
+import com.university.referral.model.Patient;
 import com.university.referral.util.CSVDataStore;
 
 import java.io.*;
@@ -242,6 +243,13 @@ public class ClinicianService {
             if (c.getClinicianID().equals(id)) return c;
         }
         return null;
+    }
+    public boolean validateClinicianLogin(String clinicianId) {
+        for (Clinician c : clinicians) {
+            if (c.getClinicianID().equals(clinicianId))
+                return true;
+        }
+        return false;
     }
 
     public List<Clinician> getAllClinicians() {
