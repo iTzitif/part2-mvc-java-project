@@ -1,15 +1,13 @@
 package com.university.referral.view;
 
-import com.university.referral.controller.AppointmentController;
-import com.university.referral.controller.ClinicianController;
-import com.university.referral.controller.PatientController;
-import com.university.referral.controller.PrescriptionController;
+import com.university.referral.controller.*;
 import com.university.referral.model.Patient;
-import com.university.referral.util.SingletonReferralManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 public class PrescriptionUI extends JFrame {
 
@@ -17,11 +15,12 @@ public class PrescriptionUI extends JFrame {
     private PatientController patientController;
     private ClinicianController clinicianController;
     private AppointmentController appointmentController;
-    private SingletonReferralManager singletonReferralManager;
 
-    private JTextField patientIDField;
-    private JTextField clinicianIDField;
-    private JTextField appointmentIDField;
+    private JComboBox<String> patientCombo;
+    private JComboBox<String> clinicianCombo;
+    private JComboBox<String> appointmentCombo;
+    private JComboBox<String> statusCombo;
+
     private JTextField medicationNameField;
     private JTextField dosageField;
     private JTextField frequencyField;
@@ -29,36 +28,34 @@ public class PrescriptionUI extends JFrame {
     private JTextField quantityField;
     private JTextArea instructionsArea;
     private JTextField pharmacyNameField;
-    private JTextField statusField;
-    private JTextField prescriptionDateField;
-    private JTextField issueDateField;
-    private JTextField collectionDateField;
+
+    private JSpinner prescriptionDateSpinner;
+    private JSpinner issueDateSpinner;
+    private JSpinner collectionDateSpinner;
+
     private String loggedInUserID;
     private String userRole;
-
-    private JButton createButton, clearButton;
-
-    private boolean isPatientMode = false;
+    private boolean isPatientMode;
 
     public PrescriptionUI() {
-        this.isPatientMode = false;
-        initCommon();
+        isPatientMode = false;
+        init();
     }
 
     public PrescriptionUI(String loggedInUserID) {
         this.loggedInUserID = loggedInUserID;
-        this.isPatientMode = true;
-        initCommon();
+        isPatientMode = true;
+        init();
     }
 
     public PrescriptionUI(String loggedInUserID, String userRole) {
         this.loggedInUserID = loggedInUserID;
         this.userRole = userRole;
-        this.isPatientMode = false;
-        initCommon();
+        isPatientMode = false;
+        init();
     }
 
-    private void initCommon() {
+    private void init() {
         prescriptionController = new PrescriptionController();
         patientController = new PatientController();
         clinicianController = new ClinicianController();
@@ -67,86 +64,24 @@ public class PrescriptionUI extends JFrame {
         setTitle("Prescription");
         setSize(900, 650);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         if (isPatientMode) {
             initPatientViewOnly();
         } else if ("General Practitioner".equalsIgnoreCase(userRole)) {
             initGPView();
         } else {
-            initComponents();
+            initCreateView();
         }
     }
 
-    private void initGPView() {
-        setLayout(new BorderLayout());
-
-        JLabel title = new JLabel("All Prescriptions");
-        title.setFont(new Font("Arial", Font.BOLD, 22));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        add(title, BorderLayout.NORTH);
-
-        var prescriptions = prescriptionController.getAllPrescriptions();
-
-        if (prescriptions.isEmpty()) {
-            add(new JLabel("No prescriptions found.", SwingConstants.CENTER), BorderLayout.CENTER);
-            return;
-        }
-
-        String[] columns = {
-                "ID", "Patient", "Clinician", "Medication", "Dosage", "Frequency",
-                "Duration", "Qty", "Pharmacy", "Status", "Prescription Date", "Issue Date", "Collection Date",
-                "Edit", "Delete"
-        };
-
-        Object[][] data = new Object[prescriptions.size()][columns.length];
-
-        for (int i = 0; i < prescriptions.size(); i++) {
-            var p = prescriptions.get(i);
-            data[i][0] = p.getPrescriptionId();
-            data[i][1] = p.getPatientId();
-            data[i][2] = p.getClinicianId();
-            data[i][3] = p.getMedicationName();
-            data[i][4] = p.getDosage();
-            data[i][5] = p.getFrequency();
-            data[i][6] = p.getDurationDays();
-            data[i][7] = p.getQuantity();
-            data[i][8] = p.getPharmacyName();
-            data[i][9] = p.getStatus();
-            data[i][10] = p.getPrescriptionDate();
-            data[i][11] = p.getIssueDate();
-            data[i][12] = p.getCollectionDate();
-            data[i][13] = "Edit";
-            data[i][14] = "Delete";
-        }
-
-        JTable table = new JTable(data, columns);
-
-        table.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = table.rowAtPoint(evt.getPoint());
-                int col = table.columnAtPoint(evt.getPoint());
-                if (col == 13) {
-                    String prescriptionId = (String) table.getValueAt(row, 0);
-                    editPrescription(prescriptionId);
-                } else if (col == 14) {
-                    String prescriptionId = (String) table.getValueAt(row, 0);
-                    deletePrescription(prescriptionId);
-                }
-            }
-        });
-
-        JScrollPane scroll = new JScrollPane(table);
-        add(scroll, BorderLayout.CENTER);
-    }
+    /* ===================== PATIENT VIEW ===================== */
 
     private void initPatientViewOnly() {
-
         setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("My Prescriptions");
+        JLabel title = new JLabel("My Prescriptions", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 22));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-
         add(title, BorderLayout.NORTH);
 
         var prescriptions = prescriptionController.getPatientPrescriptions(loggedInUserID);
@@ -156,294 +91,209 @@ public class PrescriptionUI extends JFrame {
             return;
         }
 
-        String[] columns = {
+        String[] cols = {
                 "ID", "Clinician", "Appointment", "Date",
-                "Medication", "Dosage", "Freq", "Days", "Qty",
-                "Pharmacy", "Status", "Issue", "Collected"
+                "Medication", "Dosage", "Frequency",
+                "Days", "Qty", "Pharmacy", "Status",
+                "Issue", "Collected"
         };
 
-        String[][] data = new String[prescriptions.size()][columns.length];
+        Object[][] data = new Object[prescriptions.size()][cols.length];
 
         for (int i = 0; i < prescriptions.size(); i++) {
             var p = prescriptions.get(i);
-            data[i][0] = p.getPrescriptionId();
-            data[i][1] = p.getClinicianId();
-            data[i][2] = p.getAppointmentId();
-            data[i][3] = String.valueOf(p.getPrescriptionDate());
-            data[i][4] = p.getMedicationName();
-            data[i][5] = p.getDosage();
-            data[i][6] = p.getFrequency();
-            data[i][7] = String.valueOf(p.getDurationDays());
-            data[i][8] = p.getQuantity();
-            data[i][9] = p.getPharmacyName();
-            data[i][10] = p.getStatus();
-            data[i][11] = String.valueOf(p.getIssueDate());
-            data[i][12] = String.valueOf(p.getCollectionDate());
+            data[i] = new Object[]{
+                    p.getPrescriptionId(),
+                    p.getClinicianId(),
+                    p.getAppointmentId(),
+                    p.getPrescriptionDate(),
+                    p.getMedicationName(),
+                    p.getDosage(),
+                    p.getFrequency(),
+                    p.getDurationDays(),
+                    p.getQuantity(),
+                    p.getPharmacyName(),
+                    p.getStatus(),
+                    p.getIssueDate(),
+                    p.getCollectionDate()
+            };
         }
 
-        JTable table = new JTable(data, columns);
+        JTable table = new JTable(data, cols);
         table.setEnabled(false);
-
-        JScrollPane scroll = new JScrollPane(table);
-        add(scroll, BorderLayout.CENTER);
+        add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
-    private void initComponents() {
-        if (isPatientMode) {
-            initPatientViewOnly();
-            return;
+    /* ===================== GP VIEW ===================== */
+
+    private void initGPView() {
+        setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("All Prescriptions", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        add(title, BorderLayout.NORTH);
+
+        var prescriptions = prescriptionController.getAllPrescriptions();
+
+        String[] cols = {
+                "ID", "Patient", "Clinician", "Medication",
+                "Dosage", "Status", "Edit", "Delete"
+        };
+
+        Object[][] data = new Object[prescriptions.size()][cols.length];
+
+        for (int i = 0; i < prescriptions.size(); i++) {
+            var p = prescriptions.get(i);
+            data[i] = new Object[]{
+                    p.getPrescriptionId(),
+                    p.getPatientId(),
+                    p.getClinicianId(),
+                    p.getMedicationName(),
+                    p.getDosage(),
+                    p.getStatus(),
+                    "Edit",
+                    "Delete"
+            };
         }
 
-        setLayout(new BorderLayout(10, 10));
+        JTable table = new JTable(data, cols);
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+                String id = table.getValueAt(row, 0).toString();
+                if (col == 6) editPrescription(id);
+                if (col == 7) deletePrescription(id);
+            }
+        });
 
-        JLabel titleLabel = new JLabel("Create Prescription");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(titleLabel, BorderLayout.NORTH);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+    }
 
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    /* ===================== CREATE VIEW ===================== */
+
+    private void initCreateView() {
+        setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("Create Prescription", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        add(title, BorderLayout.NORTH);
+
+        JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         int row = 0;
 
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Patient:"), gbc);
-        gbc.gridx = 1;
-        JComboBox<String> patientCombo = new JComboBox<>();
-        patientController.getAllPatients().forEach(p -> patientCombo.addItem(p.getPatientId() + " - " + p.getFirstName()));
-        formPanel.add(patientCombo, gbc);
+        patientCombo = new JComboBox<>();
+        patientController.getAllPatients()
+                .forEach(p -> patientCombo.addItem(p.getPatientId() + " - " + p.getFirstName()));
 
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Clinician:"), gbc);
-        gbc.gridx = 1;
-        JComboBox<String> clinicianCombo = new JComboBox<>();
-        clinicianController.getAllClinicians().forEach(p->clinicianCombo.addItem(p.getClinicianID() + " - " + p.getFirstName()));
-        formPanel.add(clinicianCombo, gbc);
+        clinicianCombo = new JComboBox<>();
+        clinicianController.getAllClinicians()
+                .forEach(c -> clinicianCombo.addItem(c.getClinicianID() + " - " + c.getFirstName()));
 
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Appointment:"), gbc);
-        gbc.gridx = 1;
-        JComboBox<String> appointmentCombo = new JComboBox<>();
-        appointmentController.getAllAppointments().forEach(p->appointmentCombo.addItem(p.getAppointmentId() + " - "  ));
-        formPanel.add(appointmentCombo, gbc);
+        appointmentCombo = new JComboBox<>();
+        appointmentController.getAllAppointments()
+                .forEach(a -> appointmentCombo.addItem(a.getAppointmentId()));
 
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Medication:"), gbc);
-        gbc.gridx = 1;
         medicationNameField = new JTextField(20);
-        medicationNameField.setToolTipText("Enter the medication name");
-        formPanel.add(medicationNameField, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Dosage:"), gbc);
-        gbc.gridx = 1;
         dosageField = new JTextField(20);
-        dosageField.setToolTipText("e.g., 500mg");
-        formPanel.add(dosageField, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Frequency:"), gbc);
-        gbc.gridx = 1;
         frequencyField = new JTextField(20);
-        frequencyField.setToolTipText("e.g., 3 times a day");
-        formPanel.add(frequencyField, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Duration (Days):"), gbc);
-        gbc.gridx = 1;
         durationDaysField = new JTextField(20);
-        durationDaysField.setToolTipText("Number of days to take medication");
-        formPanel.add(durationDaysField, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Quantity:"), gbc);
-        gbc.gridx = 1;
         quantityField = new JTextField(20);
-        formPanel.add(quantityField, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Instructions:"), gbc);
-        gbc.gridx = 1;
-        instructionsArea = new JTextArea(5, 20);
-        instructionsArea.setLineWrap(true);
-        JScrollPane scroll = new JScrollPane(instructionsArea);
-        formPanel.add(scroll, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Prescription Date:"), gbc);
-        gbc.gridx = 1;
-        JSpinner prescriptionDateSpinner = new JSpinner(new SpinnerDateModel());
-        prescriptionDateSpinner.setEditor(new JSpinner.DateEditor(prescriptionDateSpinner, "yyyy-MM-dd"));
-        formPanel.add(prescriptionDateSpinner, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Issue Date:"), gbc);
-        gbc.gridx = 1;
-        JSpinner issueDateSpinner = new JSpinner(new SpinnerDateModel());
-        issueDateSpinner.setEditor(new JSpinner.DateEditor(issueDateSpinner, "yyyy-MM-dd"));
-        formPanel.add(issueDateSpinner, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Collection Date:"), gbc);
-        gbc.gridx = 1;
-        JSpinner collectionDateSpinner = new JSpinner(new SpinnerDateModel());
-        collectionDateSpinner.setEditor(new JSpinner.DateEditor(collectionDateSpinner, "yyyy-MM-dd"));
-        formPanel.add(collectionDateSpinner, gbc);
-
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Pharmacy:"), gbc);
-        gbc.gridx = 1;
         pharmacyNameField = new JTextField(20);
-        formPanel.add(pharmacyNameField, gbc);
+        instructionsArea = new JTextArea(4, 20);
 
-        row++;
-        gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Status:"), gbc);
-        gbc.gridx = 1;
-        JComboBox<String> statusCombo = new JComboBox<>(new String[]{"Pending", "Issued", "Collected"});
-        formPanel.add(statusCombo, gbc);
+        prescriptionDateSpinner = createDateSpinner();
+        issueDateSpinner = createDateSpinner();
+        collectionDateSpinner = createDateSpinner();
 
-        add(formPanel, BorderLayout.CENTER);
+        statusCombo = new JComboBox<>(new String[]{"Pending", "Issued", "Collected"});
 
-        JPanel buttonPanel = new JPanel();
-        JButton createBtn = new JButton("Create Prescription");
-        createBtn.addActionListener(e -> createPrescription());
-        JButton clearBtn = new JButton("Clear");
-        clearBtn.addActionListener(e -> clearFields());
-        buttonPanel.add(createBtn);
-        buttonPanel.add(clearBtn);
-        add(buttonPanel, BorderLayout.SOUTH);
+        addRow(form, gbc, row++, "Patient", patientCombo);
+        addRow(form, gbc, row++, "Clinician", clinicianCombo);
+        addRow(form, gbc, row++, "Appointment", appointmentCombo);
+        addRow(form, gbc, row++, "Medication", medicationNameField);
+        addRow(form, gbc, row++, "Dosage", dosageField);
+        addRow(form, gbc, row++, "Frequency", frequencyField);
+        addRow(form, gbc, row++, "Duration Days", durationDaysField);
+        addRow(form, gbc, row++, "Quantity", quantityField);
+        addRow(form, gbc, row++, "Instructions", new JScrollPane(instructionsArea));
+        addRow(form, gbc, row++, "Prescription Date", prescriptionDateSpinner);
+        addRow(form, gbc, row++, "Issue Date", issueDateSpinner);
+        addRow(form, gbc, row++, "Collection Date", collectionDateSpinner);
+        addRow(form, gbc, row++, "Pharmacy", pharmacyNameField);
+        addRow(form, gbc, row++, "Status", statusCombo);
+
+        add(form, BorderLayout.CENTER);
+
+        JPanel buttons = new JPanel();
+        JButton create = new JButton("Create");
+        JButton clear = new JButton("Clear");
+
+        create.addActionListener(e -> createPrescription());
+        clear.addActionListener(e -> clearFields());
+
+        buttons.add(create);
+        buttons.add(clear);
+        add(buttons, BorderLayout.SOUTH);
     }
 
-    private void viewPatientPrescriptions() {
-
-        String patientId = JOptionPane.showInputDialog(this, "Enter Patient ID:");
-
-        if (patientId == null || patientId.trim().isEmpty()) {
-            return;
-        }
-
-        var prescriptions = prescriptionController.getPatientPrescriptions(patientId.trim());
-
-        if (prescriptions.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "No prescriptions found for patient: " + patientId,
-                    "No Data", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        String[] columns = {
-                "ID", "Clinician", "Appointment", "Date",
-                "Medication", "Dosage", "Freq", "Days", "Qty",
-                "Pharmacy", "Status", "Issue", "Collected"
-        };
-
-        String[][] data = new String[prescriptions.size()][columns.length];
-
-        for (int i = 0; i < prescriptions.size(); i++) {
-            var p = prescriptions.get(i);
-            data[i][0] = p.getPrescriptionId();
-            data[i][1] = p.getClinicianId();
-            data[i][2] = p.getAppointmentId();
-            data[i][3] = String.valueOf(p.getPrescriptionDate());
-            data[i][4] = p.getMedicationName();
-            data[i][5] = p.getDosage();
-            data[i][6] = p.getFrequency();
-            data[i][7] = String.valueOf(p.getDurationDays());
-            data[i][8] = p.getQuantity();
-            data[i][9] = p.getPharmacyName();
-            data[i][10] = p.getStatus();
-            data[i][11] = String.valueOf(p.getIssueDate());
-            data[i][12] = String.valueOf(p.getCollectionDate());
-        }
-
-        JTable table = new JTable(data, columns);
-        table.setEnabled(false);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-
-        JOptionPane.showMessageDialog(this, scrollPane,
-                "Prescriptions for Patient: " + patientId,
-                JOptionPane.PLAIN_MESSAGE);
-    }
+    /* ===================== LOGIC ===================== */
 
     private void createPrescription() {
-
         try {
-            String patientId = patientIDField.getText().trim();
+            String patientId = patientCombo.getSelectedItem().toString().split(" - ")[0];
             Patient patient = patientController.findPatient(patientId);
-
             if (patient == null) {
                 JOptionPane.showMessageDialog(this, "Patient not found!");
                 return;
             }
 
-            String clinicianId = clinicianIDField.getText().trim();
-            String appointmentId = appointmentIDField.getText().trim();
-
-            LocalDate prescriptionDate = LocalDate.parse(prescriptionDateField.getText().trim());
-            String medicationName = medicationNameField.getText().trim();
-            String dosage = dosageField.getText().trim();
-            String frequency = frequencyField.getText().trim();
-            int durationDays = Integer.parseInt(durationDaysField.getText().trim());
-            String quantity = quantityField.getText().trim();
-            String instructions = instructionsArea.getText().trim();
-            String pharmacyName = pharmacyNameField.getText().trim();
-            String status = statusField.getText().trim();
-            LocalDate issueDate = LocalDate.parse(issueDateField.getText().trim());
-            LocalDate collectionDate = LocalDate.parse(collectionDateField.getText().trim());
-
             boolean success = prescriptionController.createPrescription(
                     patientId,
-                    clinicianId,
-                    appointmentId,
-                    prescriptionDate,
-                    medicationName,
-                    dosage,
-                    frequency,
-                    durationDays,
-                    quantity,
-                    instructions,
-                    pharmacyName,
-                    status,
-                    issueDate,
-                    collectionDate
+                    clinicianCombo.getSelectedItem().toString().split(" - ")[0],
+                    appointmentCombo.getSelectedItem().toString(),
+                    toLocalDate(prescriptionDateSpinner),
+                    medicationNameField.getText(),
+                    dosageField.getText(),
+                    frequencyField.getText(),
+                    Integer.parseInt(durationDaysField.getText()),
+                    quantityField.getText(),
+                    instructionsArea.getText(),
+                    pharmacyNameField.getText(),
+                    statusCombo.getSelectedItem().toString(),
+                    toLocalDate(issueDateSpinner),
+                    toLocalDate(collectionDateSpinner)
             );
 
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Prescription created successfully!");
-                clearFields();
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to create prescription.");
-            }
+            JOptionPane.showMessageDialog(this,
+                    success ? "Prescription created successfully!" : "Failed to create prescription.");
+
+            if (success) clearFields();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void editPrescription(String id) {
+        JOptionPane.showMessageDialog(this,
+                "Edit handled via create screen.\n(ID: " + id + ")");
+    }
+
+    private void deletePrescription(String id) {
+        if (JOptionPane.showConfirmDialog(this,
+                "Delete prescription " + id + "?",
+                "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
+            prescriptionController.deletePrescription(id);
+            JOptionPane.showMessageDialog(this, "Prescription deleted.");
         }
     }
 
     private void clearFields() {
-        patientIDField.setText("");
-        clinicianIDField.setText("");
-        appointmentIDField.setText("");
-        prescriptionDateField.setText("");
         medicationNameField.setText("");
         dosageField.setText("");
         frequencyField.setText("");
@@ -451,47 +301,25 @@ public class PrescriptionUI extends JFrame {
         quantityField.setText("");
         instructionsArea.setText("");
         pharmacyNameField.setText("");
-        statusField.setText("");
-        issueDateField.setText("");
-        collectionDateField.setText("");
+        statusCombo.setSelectedIndex(0);
     }
 
-    private void deletePrescription(String prescriptionId) {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete prescription " + prescriptionId + "?",
-                "Confirm Delete",
-                JOptionPane.YES_NO_OPTION
-        );
-        if (confirm == JOptionPane.YES_OPTION) {
-            boolean success = prescriptionController.deletePrescription(prescriptionId);
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Prescription deleted successfully.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to delete prescription.");
-            }
-        }
-    }
-    private void editPrescription(String prescriptionId) {
-        var p = prescriptionController.findPrescription(prescriptionId);
-        if (p == null) {
-            JOptionPane.showMessageDialog(this, "Prescription not found!");
-            return;
-        }
-
-        patientIDField.setText(p.getPatientId());
-        clinicianIDField.setText(p.getClinicianId());
-        appointmentIDField.setText(p.getAppointmentId());
-        medicationNameField.setText(p.getMedicationName());
-        dosageField.setText(p.getDosage());
-        frequencyField.setText(p.getFrequency());
-        durationDaysField.setText(String.valueOf(p.getDurationDays()));
-        quantityField.setText(p.getQuantity());
-        instructionsArea.setText(p.getInstructions());
-        pharmacyNameField.setText(p.getPharmacyName());
-        statusField.setText(p.getStatus());
-        prescriptionDateField.setText(String.valueOf(p.getPrescriptionDate()));
-        issueDateField.setText(String.valueOf(p.getIssueDate()));
-        collectionDateField.setText(String.valueOf(p.getCollectionDate()));
+    private JSpinner createDateSpinner() {
+        JSpinner s = new JSpinner(new SpinnerDateModel());
+        s.setEditor(new JSpinner.DateEditor(s, "yyyy-MM-dd"));
+        return s;
     }
 
+    private LocalDate toLocalDate(JSpinner spinner) {
+        Date d = (Date) spinner.getValue();
+        return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    private void addRow(JPanel p, GridBagConstraints gbc, int row, String label, Component c) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        p.add(new JLabel(label), gbc);
+        gbc.gridx = 1;
+        p.add(c, gbc);
+    }
 }

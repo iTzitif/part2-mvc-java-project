@@ -15,6 +15,9 @@ public class NotificationGenerator {
 
     private NotificationGenerator() {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        patientService = new PatientService();
+        clinicianService = new ClinicianService();
+
     }
 
     public static synchronized NotificationGenerator getInstance() {
